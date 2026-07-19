@@ -1,0 +1,3 @@
+library_id,library_name,library_version,library_type
+LIB_A,Illumina TruSeq DNA Library Prep Kit v2,2.0,WES
+LIB_B,Twist Library Prep Kit v2,2.0,WES

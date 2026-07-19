@@ -1,0 +1,2 @@
+# No external dependencies required.
+# This parser uses only Python standard library (json, csv, argparse, logging, pathlib, datetime).

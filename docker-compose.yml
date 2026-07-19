@@ -1,0 +1,83 @@
+
+services:
+  db:
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ngsqcdb
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ngsqcdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile.parser
+    image: ${PROJECT_NAME:-ngsqc}_parser:latest
+    container_name: ${PROJECT_NAME:-ngsqc}_parser
+    profiles: ["tools"]
+    volumes:
+      - ${RAW_DATA_DIR:?Set RAW_DATA_DIR in .env}:/data/raw:ro
+      - ${PROCESSED_DATA_DIR:?Set PROCESSED_DATA_DIR in .env}:/data/processed
+      - ${LOG_DIR:?Set LOG_DIR in .env}:/logs
+    environment:
+      PARSER_LOG_LEVEL: ${PARSER_LOG_LEVEL:-INFO}
+    restart: "no"
+
+  loader:
+    build:
+      context: .
+      dockerfile: Dockerfile.loader
+    image: ${PROJECT_NAME:-ngsqc}_loader:latest
+    container_name: ${PROJECT_NAME:-ngsqc}_loader
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ${PROCESSED_DATA_DIR:?Set PROCESSED_DATA_DIR in .env}:/data/processed:ro
+      - ${RAW_DATA_DIR:?Set RAW_DATA_DIR in .env}/reference_tables:/data/reference_tables:ro
+      - ./db:/opt/ngsqc/db:ro
+      - ${LOG_DIR:?Set LOG_DIR in .env}:/logs
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-ngsqcdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PYTHONUNBUFFERED: "1"
+    restart: "no"
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    image: ${PROJECT_NAME:-ngsqc}_streamlit:latest
+    container_name: ${PROJECT_NAME:-ngsqc}_streamlit
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      - ./app:/opt/ngsqc/app
+      - ${CONFIG_DIR:?Set CONFIG_DIR in .env}:/config:ro
+      - ${LOG_DIR:?Set LOG_DIR in .env}:/logs
+    environment:
+      NGS_DB_URL: ${NGS_DB_URL:-postgresql://postgres:postgres@db:5432/ngsqcdb}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-ngsqcdb}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_SERVER_PORT: 8501
+      PYTHONUNBUFFERED: "1"
+    restart: unless-stopped

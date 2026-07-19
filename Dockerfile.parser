@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+WORKDIR /opt/ngsqc
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY parser/ /opt/ngsqc/parser/
+
+RUN python -m pip install --upgrade pip && \
+    if [ -f /opt/ngsqc/parser/Illumina_Runs/requirements.txt ]; then \
+      pip install -r /opt/ngsqc/parser/Illumina_Runs/requirements.txt; \
+    elif [ -f /opt/ngsqc/parser/requirements.txt ]; then \
+      pip install -r /opt/ngsqc/parser/requirements.txt; \
+    fi
+
+RUN mkdir -p /data/raw /data/processed /logs
+
+ENTRYPOINT ["python", "/opt/ngsqc/parser/Illumina_Runs/Illumina_sequencing_data_parser.py"]

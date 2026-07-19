@@ -1,0 +1,4 @@
+sequencing_chemistry_id,chemistry_name,platform_id
+NOVA_S4,NovaSeq S4 2x150,ILLUMINA
+NEXT_P3,NextSeq P3 2x75,ILLUMINA
+MISEQ_V3,MiSeq v3 2x300,ILLUMINA

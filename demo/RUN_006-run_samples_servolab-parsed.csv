@@ -1,0 +1,5 @@
+sample_id,sex,registration_date,clinical_test,sample_type
+RUN_006_S01,M,2025-04-02,WES,Blood
+RUN_006_S02,F,2025-04-01,WGS,Saliva
+RUN_006_S03,Unknown,2025-03-31,Panel,FFPE
+RUN_006_S04,M,2025-03-30,Amplicon,Cell Line

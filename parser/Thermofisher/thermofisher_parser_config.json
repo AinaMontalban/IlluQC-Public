@@ -1,0 +1,74 @@
+{
+  "platform_id": "THERMOFISHER",
+  "metric_id_map": {
+    "totalNumReads": "READS_TOTAL",
+    "q20_mean_read_length": "READ_LENGTH_MEAN",
+    "q20_bases_pct": "Q20_BASES_PCT",
+    "loading": "LOADING_PCT",
+    "addressavailable": "ADDRESS_AVAILABLE"
+  },
+  "chemistry_attribute_map": {
+    "chipType": "CHIP_TYPE",
+    "chipBarcode": "CHIP_BARCODE"
+  },
+  "output_suffixes": {
+    "sequencing_info": "-sequencing-info.csv",
+    "sequencing_metrics": "-sequencing-metrics.csv"
+  },
+  "fields": {
+    "sequencing_info": [
+      "run_id",
+      "run_folder",
+      "run_description",
+      "day_id",
+      "instrument_id",
+      "platform_id",
+      "sequencing_chemistry_id",
+      "num_cycles",
+      "num_samples"
+    ],
+    "sequencing_metrics": [
+      "run_id",
+      "day_id",
+      "metric_id",
+      "value_number"
+    ]
+  },
+  "serialized_model_fields": {
+    "rundb.experiment": [
+      "chipType",
+      "chipBarcode",
+      "chefReagentsPart",
+      "pgmName",
+      "chefChipType1",
+      "chefChipType2",
+      "expName",
+      "date",
+      "sequencekitname",
+      "flows",
+      "platform"
+    ],
+    "rundb.plannedexperiment": [
+      "planDisplayedName",
+      "templatingKitName",
+      "expName"
+    ],
+    "rundb.experimentanalysissettings": [
+      "libraryKitName"
+    ],
+    "rundb.analysismetrics": [
+      "loading"
+    ],
+    "rundb.libmetrics": [
+      "totalNumReads",
+      "total_mapped_reads",
+      "total_mapped_target_bases",
+      "q20_alignments"
+    ],
+    "rundb.qualitymetrics": [
+      "q20_mean_read_length",
+      "q0_reads",
+      "q20_bases"
+    ]
+  }
+}

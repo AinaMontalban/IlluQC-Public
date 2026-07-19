@@ -1,0 +1,15 @@
+{
+  "metric_id_map": {
+    "FastQC_mqc-generalstats-fastqc-total_sequences": "FASTQC_TOTAL_SEQUENCES",
+    "FastQC_mqc-generalstats-fastqc-percent_fails": "FASTQC_PERCENT_FAILS",
+    "FastQC_mqc-generalstats-fastqc-percent_gc": "FASTQC_GC_PCT",
+    "FastQC_mqc-generalstats-fastqc-percent_duplicates": "FASTQC_PERCENT_DUPLICATES",
+    "FastQC_mqc-generalstats-fastqc-avg_sequence_length": "FASTQC_AVG_SEQUENCE_LENGTH"
+  },
+  "output_suffixes": {
+    "sample_qc_metrics": "-samples-qc-metrics.csv"
+  },
+  "fields": {
+    "sample_qc_metrics": ["sample_id", "run_id", "read", "metric_id", "value_number"]
+  }
+}
