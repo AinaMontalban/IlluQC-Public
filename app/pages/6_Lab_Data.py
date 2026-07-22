@@ -5,8 +5,8 @@ import pandas as pd
 
 from db import get_engine
 
-st.set_page_config(page_title="Reference Data", layout="wide")
-st.write("# Reference Data")
+st.set_page_config(page_title="Lab Data", layout="wide")
+st.write("# Lab Data")
 
 engine = get_engine()
 

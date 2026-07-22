@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/_common.sh"
 load_env
 
 # Directories
-INPUT_RUNS_DIR="$RAW_DATA_DIR"
+INPUT_RUNS_DIR="$ILLUMINA_RAW_DATA_DIR"
 PROCESSED_SAMPLES_DIR="$PROCESSED_DATA_DIR/Samples_Data"
 LOG_DIR="${LOG_DIR:-$PWD/logs}"
 mkdir -p "$LOG_DIR"

@@ -63,7 +63,7 @@ This creates:
 Put Illumina run folders here:
 
 ```text
-../NGS_Data/raw_data/Runs_Data/RUN_ID/
+../NGS_Data/raw_data/illumina/RUN_ID/
 ```
 
 Each run folder should contain:
@@ -78,8 +78,8 @@ InterOp/
 Put reference tables here:
 
 ```text
-../NGS_Data/raw_data/reference_tables/sequencing_instruments.csv
-../NGS_Data/raw_data/reference_tables/sequencing_chemistry.csv
+../NGS_Data/raw_data/illumina/reference_tables/sequencing_instruments.csv
+../NGS_Data/raw_data/illumina/reference_tables/sequencing_chemistry.csv
 ```
 
 ## 6. Build and start services
@@ -125,7 +125,7 @@ This attempts to load:
 ```text
 RUN_ID-sequencing-info.csv
 RUN_ID-sequencing-metrics.csv
-RUN_ID-run_samples_servolab-parsed.csv
+RUN_ID-samples-metadata.csv
 RUN_ID-samples-qc-metrics.csv
 ```
 

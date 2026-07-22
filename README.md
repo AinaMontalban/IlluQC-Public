@@ -41,17 +41,19 @@ IlluQC/
 The data directory should live outside the repository, for example as `../IlluQC_Data`:
 
 ```text
-IlluQC_Data/
+NGS_Data/
 ├── raw_data/
-│   ├── Runs_Data/
-│   │   └── RUN_ID/
-│   │       ├── RunInfo.xml
-│   │       ├── RunParameters.xml
-│   │       ├── SampleSheet.csv
-│   │       └── InterOp/
-│   └── reference_tables/
-│       ├── sequencing_instruments.csv
-│       └── sequencing_chemistry.csv
+│   ├── illumina/
+│   │   ├── RUN_ID/
+│   │   │   ├── RunInfo.xml
+│   │   │   ├── RunParameters.xml
+│   │   │   ├── SampleSheet.csv
+│   │   │   └── InterOp/
+│   │   └── reference_tables/
+│   └── thermofisher/
+│       ├── serialized_run.json
+│       ├── Plan_run.json
+│       └── reference_tables/
 ├── processed/
 │   ├── Runs_Data/
 │   └── Samples_Data/
@@ -85,7 +87,7 @@ Before loading any sequencing runs, you must load the reference tables for instr
 Place the reference CSV files here:
 
 ```text
-../NGS_Data/raw_data/reference_tables/
+../NGS_Data/raw_data/illumina/reference_tables/
 ├── sequencing_instruments.csv
 └── sequencing_chemistry.csv
 ```
@@ -172,6 +174,51 @@ Then run:
 
 ```bash
 make parse-all
+```
+
+## Parse a Thermo Fisher run
+
+Place an Ion Torrent S5 serialized JSON export or a Genexus Plan JSON export
+anywhere below `THERMOFISHER_RAW_DATA_DIR`. Then run:
+
+```bash
+make parse-thermofisher \
+  JSON_FILE=Thermofisher_Data/serialized_run.json \
+  DESCRIPTION="Re-sequencing run"
+```
+
+The parser detects S5 and Genexus formats automatically. To force one format:
+
+```bash
+make parse-thermofisher \
+  JSON_FILE=Thermofisher_Data/Plan_run.json \
+  DESCRIPTION="Genexus run" \
+  MODEL=GENEXUS
+```
+
+`MODEL` accepts `S5` or `GENEXUS`. `JSON_FILE` may be relative to
+`THERMOFISHER_RAW_DATA_DIR` or an absolute path inside it. Normalized run and metric CSVs are
+written to `PROCESSED_DATA_DIR/Runs_Data` and can be loaded with the existing
+`make load RUN_ID=...` command.
+
+To recursively parse every supported Thermo Fisher JSON export:
+
+```bash
+make parse-thermofisher-all MODEL=S5
+```
+
+Use `MODEL=S5` for `serialized_*.json` exports or `MODEL=GENEXUS` for
+`Plan_*.json`/`plan_*.json` exports. The model limits discovery to matching
+files and forces the corresponding parser. Use `MODEL=AUTO` or omit `MODEL` to
+parse both formats with automatic detection. The wrapper continues after
+individual failures, prints a summary, and returns a failure status if any
+export could not be parsed. An optional description can be applied to every
+matching export:
+
+```bash
+make parse-thermofisher-all \
+  MODEL=GENEXUS \
+  DESCRIPTION="Imported Genexus runs"
 ```
 
 ### Optional: Use a manifest file with run descriptions

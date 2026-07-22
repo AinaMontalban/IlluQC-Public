@@ -23,7 +23,7 @@ cp -f demo/sequencing_chemistry.csv "$PROCESSED_DATA_DIR/" 2>/dev/null || true
 cp -f demo/library.csv "$PROCESSED_DATA_DIR/" 2>/dev/null || true
 cp -f demo/RUN_*-sequencing-info.csv "$PROCESSED_DATA_DIR/Runs_Data/" 2>/dev/null || true
 cp -f demo/RUN_*-sequencing-metrics.csv "$PROCESSED_DATA_DIR/Runs_Data/" 2>/dev/null || true
-cp -f demo/RUN_*-run_samples_servolab-parsed.csv "$PROCESSED_DATA_DIR/Samples_Data/" 2>/dev/null || true
+cp -f demo/RUN_*-samples-metadata.csv "$PROCESSED_DATA_DIR/Samples_Data/" 2>/dev/null || true
 cp -f demo/RUN_*-samples-qc-metrics.csv "$PROCESSED_DATA_DIR/Samples_Data/" 2>/dev/null || true
 
 docker compose up -d db

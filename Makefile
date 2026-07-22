@@ -8,7 +8,7 @@ endif
 COMPOSE ?= docker compose
 
 .PHONY: setup-data-dirs up down reset logs db-shell app \
-        parse parse-all parse-multiqc-all parse-sample-metadata-all add-sample-qc-libraries load-reference load load-all load-sample-data load-sample-qc-metrics \
+        parse parse-thermofisher parse-thermofisher-all parse-all parse-multiqc-all parse-sample-metadata-all add-sample-qc-libraries load-reference load load-all load-sample-data load-sample-qc-metrics \
         backup restore wait-for-db demo
 
 setup-data-dirs:
@@ -37,6 +37,12 @@ wait-for-db:
 
 parse:
 	bash scripts/parse_run.sh "$(RUN_ID)" "$(DESCRIPTION)"
+
+parse-thermofisher:
+	bash scripts/parse_thermofisher_run.sh "$(JSON_FILE)" "$(DESCRIPTION)" "$(MODEL)"
+
+parse-thermofisher-all:
+	bash scripts/parse_thermofisher_all.sh "$(DESCRIPTION)" "$(MODEL)"
 
 parse-all:
 	bash scripts/parse_all_runs.sh

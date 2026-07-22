@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_common.sh"
 load_env
 
-RUNS_DIR="$RAW_DATA_DIR/"
+RUNS_DIR="$ILLUMINA_RAW_DATA_DIR"
 OUT_DIR="/data/processed/Samples_Data"
 mkdir -p "$PROCESSED_DATA_DIR/Samples_Data" "$LOG_DIR/parser"
 
@@ -21,7 +21,7 @@ for run_dir in "$RUNS_DIR"/*/; do
     echo "Processing MultiQC for run: $run_id"
     if compose run --rm --entrypoint python parser \
       /opt/ngsqc/parser/MultiQC/multiqc_data_parser.py \
-      "/data/raw/$run_id/multiqc_general_stats.txt" \
+      "/data/raw/illumina/$run_id/multiqc_general_stats.txt" \
       --run-id "$run_id" \
       --format csv \
       --output-dir "$OUT_DIR" \

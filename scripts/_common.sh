@@ -11,7 +11,9 @@ load_env() {
 
   export PROJECT_NAME="${PROJECT_NAME:-ngsqc}"
   export NGS_DATA_ROOT="${NGS_DATA_ROOT:-../NGS_Data}"
-  export RAW_DATA_DIR="${RAW_DATA_DIR:-$NGS_DATA_ROOT/raw_data}"
+  # RAW_DATA_DIR remains a fallback for older .env files.
+  export ILLUMINA_RAW_DATA_DIR="${ILLUMINA_RAW_DATA_DIR:-${RAW_DATA_DIR:-$NGS_DATA_ROOT/raw_data/illumina}}"
+  export THERMOFISHER_RAW_DATA_DIR="${THERMOFISHER_RAW_DATA_DIR:-$NGS_DATA_ROOT/raw_data/thermofisher}"
   export PROCESSED_DATA_DIR="${PROCESSED_DATA_DIR:-$NGS_DATA_ROOT/processed}"
   export LOG_DIR="${LOG_DIR:-$NGS_DATA_ROOT/logs}"
   export BACKUP_DIR="${BACKUP_DIR:-$NGS_DATA_ROOT/backups}"

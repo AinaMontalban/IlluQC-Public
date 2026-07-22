@@ -24,7 +24,8 @@ services:
     container_name: ${PROJECT_NAME:-ngsqc}_parser
     profiles: ["tools"]
     volumes:
-      - ${RAW_DATA_DIR:?Set RAW_DATA_DIR in .env}:/data/raw:ro
+      - ${ILLUMINA_RAW_DATA_DIR:?Set ILLUMINA_RAW_DATA_DIR in .env}:/data/raw/illumina:ro
+      - ${THERMOFISHER_RAW_DATA_DIR:?Set THERMOFISHER_RAW_DATA_DIR in .env}:/data/raw/thermofisher:ro
       - ${PROCESSED_DATA_DIR:?Set PROCESSED_DATA_DIR in .env}:/data/processed
       - ${LOG_DIR:?Set LOG_DIR in .env}:/logs
     environment:
@@ -43,7 +44,6 @@ services:
         condition: service_healthy
     volumes:
       - ${PROCESSED_DATA_DIR:?Set PROCESSED_DATA_DIR in .env}:/data/processed:ro
-      - ${RAW_DATA_DIR:?Set RAW_DATA_DIR in .env}/reference_tables:/data/reference_tables:ro
       - ./db:/opt/ngsqc/db:ro
       - ${LOG_DIR:?Set LOG_DIR in .env}:/logs
     environment:
@@ -79,5 +79,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       STREAMLIT_SERVER_ADDRESS: 0.0.0.0
       STREAMLIT_SERVER_PORT: 8501
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
       PYTHONUNBUFFERED: "1"
     restart: unless-stopped

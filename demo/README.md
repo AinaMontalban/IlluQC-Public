@@ -8,7 +8,7 @@ This folder contains **synthetic, non-sensitive** demo CSV files for testing the
 - `sequencing_chemistry.csv`: synthetic sequencing chemistry reference rows.
 - `DEMO_RUN_*-sequencing-info.csv`: synthetic run-level metadata.
 - `DEMO_RUN_*-sequencing-metrics.csv`: synthetic run-level QC metrics.
-- `DEMO_RUN_*-run_samples_servolab-parsed.csv`: synthetic sample metadata.
+- `DEMO_RUN_*-samples-metadata.csv`: synthetic sample metadata.
 - `DEMO_RUN_*-samples-qc-metrics.csv`: synthetic sample-level QC metrics.
 
 ## Usage

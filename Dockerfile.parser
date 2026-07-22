@@ -11,13 +11,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY parser/ /opt/ngsqc/parser/
 
-RUN python -m pip install --upgrade pip && \
-    if [ -f /opt/ngsqc/parser/Illumina_Runs/requirements.txt ]; then \
+RUN if [ -f /opt/ngsqc/parser/Illumina_Runs/requirements.txt ]; then \
       pip install -r /opt/ngsqc/parser/Illumina_Runs/requirements.txt; \
     elif [ -f /opt/ngsqc/parser/requirements.txt ]; then \
       pip install -r /opt/ngsqc/parser/requirements.txt; \
     fi
 
-RUN mkdir -p /data/raw /data/processed /logs
+RUN groupadd --gid 10001 ngsqc && \
+    useradd --uid 10001 --gid ngsqc --no-create-home ngsqc && \
+    mkdir -p /data/raw /data/processed /logs && \
+    chown -R ngsqc:ngsqc /data /logs /opt/ngsqc
+
+USER ngsqc
 
 ENTRYPOINT ["python", "/opt/ngsqc/parser/Illumina_Runs/Illumina_sequencing_data_parser.py"]

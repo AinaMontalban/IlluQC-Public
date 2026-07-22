@@ -68,7 +68,7 @@ if sequencing_qc_df.empty:
 # ---------------------------------------------------------------------------
 
 # Let the user pick a protocol (run_description); filter all downstream data
-selected_run_description = st.selectbox("Select a Protocol", sequencing_qc_df['run_description'].unique())
+selected_run_description = st.selectbox("Select a Protocol:", sequencing_qc_df['run_description'].unique())
 
 filtered_sequencing_qc_df = sequencing_qc_df[sequencing_qc_df['run_description'] == selected_run_description]
 

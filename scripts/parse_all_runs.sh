@@ -6,14 +6,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_common.sh"
 load_env
 
-RUNS_DIR="$RAW_DATA_DIR/"
+RUNS_DIR="$ILLUMINA_RAW_DATA_DIR"
 if [ ! -d "$RUNS_DIR" ]; then
   echo "ERROR: runs directory not found: $RUNS_DIR" >&2
   exit 1
 fi
 
 # Check for optional manifest file
-MANIFEST_FILE="$(dirname "$RAW_DATA_DIR")/runs_manifest.csv"
+MANIFEST_FILE="$ILLUMINA_RAW_DATA_DIR/runs_manifest.csv"
 declare -A run_descriptions
 
 if [ -f "$MANIFEST_FILE" ]; then

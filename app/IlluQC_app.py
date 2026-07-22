@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="IlluQC Database App"
+    page_title="IlluQC Database App", layout="wide"
 )
 
 st.write("# IlluQC Database App")
