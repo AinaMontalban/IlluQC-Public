@@ -1,22 +1,22 @@
 FROM python:3.11-slim
 
-WORKDIR /opt/ngsqc
+WORKDIR /opt/illuqc
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY db/ /opt/ngsqc/db/
-COPY init-db/ /opt/ngsqc/init_db/
+COPY db/ /opt/illuqc/db/
+COPY init-db/ /opt/illuqc/init_db/
 
-RUN pip install --no-cache-dir -r /opt/ngsqc/db/requirements.txt
+RUN pip install --no-cache-dir -r /opt/illuqc/db/requirements.txt
 
-RUN groupadd --gid 10001 ngsqc && \
-    useradd --uid 10001 --gid ngsqc --no-create-home ngsqc && \
+RUN groupadd --gid 10001 illuqc && \
+    useradd --uid 10001 --gid illuqc --no-create-home illuqc && \
     mkdir -p /data/processed /logs && \
-    chown -R ngsqc:ngsqc /data /logs /opt/ngsqc
+    chown -R illuqc:illuqc /data /logs /opt/illuqc
 
-USER ngsqc
+USER illuqc
 
-ENTRYPOINT ["python", "/opt/ngsqc/db/upload_CSV.py"]
+ENTRYPOINT ["python", "/opt/illuqc/db/upload_CSV.py"]

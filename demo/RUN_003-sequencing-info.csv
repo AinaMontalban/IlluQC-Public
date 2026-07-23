@@ -1,2 +1,0 @@
-run_id,run_folder,run_description,day_id,instrument_id,platform_id,sequencing_chemistry_id,flowcell_part_number,reagent_kit_part_number,num_cycles,num_samples
-RUN_003,20250218_INST_001_003,WES,2025-02-18,NOVA_01,ILLUMINA,NOVA_S4,FC_NOVA_S4,RKIT_NOVA_S4,300,6

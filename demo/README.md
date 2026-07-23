@@ -6,10 +6,18 @@ This folder contains **synthetic, non-sensitive** demo CSV files for testing the
 
 - `sequencing_instruments.csv`: synthetic reference instruments.
 - `sequencing_chemistry.csv`: synthetic sequencing chemistry reference rows.
-- `DEMO_RUN_*-sequencing-info.csv`: synthetic run-level metadata.
-- `DEMO_RUN_*-sequencing-metrics.csv`: synthetic run-level QC metrics.
-- `DEMO_RUN_*-samples-metadata.csv`: synthetic sample metadata.
-- `DEMO_RUN_*-samples-qc-metrics.csv`: synthetic sample-level QC metrics.
+- `R###-sequencing-info.csv`: synthetic MiSeq run-level metadata.
+- `R###-sequencing-metrics.csv`: synthetic MiSeq run-level QC metrics.
+- `R###-samples-metadata.csv`: synthetic sample metadata.
+- `R###-samples-qc-metrics.csv`: synthetic HLA and ALLOSEQ sample metrics.
+
+The dataset contains two synthetic MiSeq instruments, two libraries (`HLA` and
+`ALLOSEQ`), and two sequencing chemistries (`MISEQ_V2` and `MISEQ_V3`). Run
+`R010` uses MiSeq v3 chemistry. Run `R011` repeats samples `S001`–`S005` from
+`R001` using the same MiSeq v2 chemistry, allowing longitudinal comparison
+without a chemistry change. Each run is assigned entirely to either `HLA` or
+`ALLOSEQ`; its run description, sample clinical method, QC library, and library
+mapping all use the same value.
 
 ## Usage
 

@@ -7,10 +7,6 @@
     "loading": "LOADING_PCT",
     "addressavailable": "ADDRESS_AVAILABLE"
   },
-  "chemistry_attribute_map": {
-    "chipType": "CHIP_TYPE",
-    "chipBarcode": "CHIP_BARCODE"
-  },
   "output_suffixes": {
     "sequencing_info": "-sequencing-info.csv",
     "sequencing_metrics": "-sequencing-metrics.csv"
@@ -37,24 +33,15 @@
   "serialized_model_fields": {
     "rundb.experiment": [
       "chipType",
-      "chipBarcode",
-      "chefReagentsPart",
       "pgmName",
-      "chefChipType1",
-      "chefChipType2",
       "expName",
       "date",
-      "sequencekitname",
       "flows",
       "platform"
     ],
     "rundb.plannedexperiment": [
       "planDisplayedName",
-      "templatingKitName",
       "expName"
-    ],
-    "rundb.experimentanalysissettings": [
-      "libraryKitName"
     ],
     "rundb.analysismetrics": [
       "loading"

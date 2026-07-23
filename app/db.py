@@ -1,8 +1,9 @@
 """Shared database engine for the Streamlit app."""
 
 import os
+import logging
 import streamlit as st
-from sqlalchemy import create_engine, text
+from sqlalchemy import URL, create_engine, text
 from sqlalchemy.exc import OperationalError
 
 
@@ -17,9 +18,9 @@ def get_engine():
     # Read from environment variables (set by docker-compose)
     db_host = os.getenv("DB_HOST", "localhost")
     db_port = os.getenv("DB_PORT", "5432")
-    db_name = os.getenv("DB_NAME", "ngsqcdb")
-    db_user = os.getenv("DB_USER", "postgres")
-    db_password = os.getenv("DB_PASSWORD", "postgres")
+    db_name = os.getenv("DB_NAME", "illuqcdb")
+    db_user = os.getenv("DB_USER", "illuqc")
+    db_password = os.getenv("DB_PASSWORD")
 
     if not all([db_host, db_port, db_name, db_user, db_password]):
         st.error(
@@ -29,9 +30,13 @@ def get_engine():
         )
         st.stop()
 
-    url = (
-        f"postgresql+psycopg2://{db_user}:{db_password}"
-        f"@{db_host}:{db_port}/{db_name}"
+    url = URL.create(
+        "postgresql+psycopg2",
+        username=db_user,
+        password=db_password,
+        host=db_host,
+        port=int(db_port),
+        database=db_name,
     )
 
     engine = create_engine(url)
@@ -40,10 +45,11 @@ def get_engine():
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-    except OperationalError as exc:
+    except OperationalError:
+        logging.exception("Database connection failed")
         st.error(
             f"🗄️ **Cannot connect to the database.**  \n"
-            f"`{db_host}:{db_port}/{db_name}` — {exc}"
+            f"Check the database service and credentials for `{db_host}:{db_port}/{db_name}`."
         )
         st.stop()
 

@@ -27,6 +27,7 @@ with st.expander(" How to use this app", expanded=True):
         | Runs | Inspect **individual runs**. Pick a run to see its metadata and compare a chosen metric across all runs with a density plot. |
         | Samples | Visualise **per-sample QC metrics** (FastQC) for a selected run. Box-plot distributions, per-sample bar charts, and R1 vs R2 scatter comparisons. |
         | Database | Browse raw database tables (samples, instruments, library, protocols, QC metrics, etc.) for quick look-ups. |
+        | About | Basic information about IlluQC. |
         ---
 
         ### Typical workflow
@@ -43,4 +44,3 @@ with st.expander(" How to use this app", expanded=True):
 
         """
     )
-

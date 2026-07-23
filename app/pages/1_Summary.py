@@ -4,11 +4,12 @@ import pandas as pd
 import plotly.express as px
 
 from db import get_engine
+from errors import show_data_error
 import queries
 
 # Page configuration must be the first Streamlit command in this script.
 st.set_page_config(page_title="Activity Summary", layout="wide")
-st.header("NGSQC Activity Summary")
+st.header("IlluQC Activity Summary")
 
 engine = get_engine()
 
@@ -119,14 +120,14 @@ with tab2:
                 st.warning("⚠️ Registration dates not available in sample data. Showing all samples.")
             
             total_samples = samples_df["sample_id"].nunique()
-            clinical_test = samples_df["clinical_test"].nunique()
+            clinical_method = samples_df["clinical_method"].nunique()
             col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.metric("Total Samples", total_samples, border=True)
 
             with col2:
-                st.metric("Clinical Tests", clinical_test, border=True)
+                st.metric("Clinical Methods", clinical_method, border=True)
             
             with col3:
                 # Sex distribution pie chart - calculate from samples_df
@@ -176,5 +177,5 @@ with tab2:
         else:
             st.info("No data is available for the selected year.")
             
-    except Exception as e:
-        st.error(f"Could not load sample summary: {e}")
+    except Exception as exc:
+        show_data_error("Could not load sample summary", exc)

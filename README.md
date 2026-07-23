@@ -1,6 +1,6 @@
 # IlluQC
 
-IlluQC is a reproducible workflow for parsing Illumina sequencing run quality-control data, loading the resulting CSV files into PostgreSQL, and visualising the data with a Streamlit dashboard.
+IlluQC is a reproducible workflow for parsing Illumina and Thermo Fisher sequencing run quality-control data, loading the resulting CSV files into PostgreSQL, and visualising the data with a Streamlit dashboard.
 
 The project is designed around one important rule:
 
@@ -23,8 +23,16 @@ IlluQC/
 ├── app/
 ├── parser/
 ├── db/
-├── init_db/
+├── init-db/
 ├── scripts/
+│   ├── database/    # Backup, restore, and demo loading
+│   ├── lab/         # Laboratory reference-data loading
+│   ├── legacy/      # Low-level compatibility loaders
+│   ├── lib/         # Shared shell helpers
+│   ├── runs/        # Run parsing and loading
+│   ├── runtime/     # Compose, setup, and readiness helpers
+│   ├── samples/     # Sample validation, preparation, and loading
+│   └── tools/       # Standalone maintenance/documentation utilities
 ├── containers/
 ├── Dockerfile.parser
 ├── Dockerfile.loader
@@ -38,7 +46,7 @@ IlluQC/
 
 ## External data layout
 
-The data directory should live outside the repository, for example as `../IlluQC_Data`:
+The data directory should live outside the repository, for example as `../NGS_Data`:
 
 ```text
 NGS_Data/
@@ -70,9 +78,25 @@ NGS_Data/
 
 ```bash
 cp .env.example .env
-make setup-data-dirs
-make up
+./illuqc setup
+./illuqc start
 ```
+
+Install the repository's `illuqc` launcher on your shell `PATH` to omit the
+leading `./`. Once installed, the main workflow is:
+
+```bash
+illuqc start
+illuqc load-lab-data
+illuqc parse RUN_ID "Run description"
+illuqc load RUN_ID
+illuqc status
+illuqc backup
+illuqc stop
+```
+
+Run `illuqc help` for the complete command reference. Existing Make targets
+remain available as compatibility aliases.
 
 Open the dashboard at:
 
@@ -80,16 +104,39 @@ Open the dashboard at:
 http://localhost:8501
 ```
 
+For complete native, Docker Compose, and Apptainer/Singularity installation
+instructions, see [INSTALLATION_OPTIONS.md](INSTALLATION_OPTIONS.md).
+
+## Documentation
+
+The full documentation is indexed at [docs/README.md](docs/README.md):
+
+| Guide | Contents |
+|---|---|
+| [Getting started](docs/getting-started.md) | Installation and the first end-to-end ingestion. |
+| [Architecture](docs/architecture.md) | Services, boundaries, persistence, and data flow. |
+| [Configuration](docs/configuration.md) | Environment variables, mounts, users, and database settings. |
+| [Workflows](docs/workflows.md) | Illumina, Thermo Fisher, MultiQC, metadata, and loading. |
+| [Data model](docs/data-model.md) | Tables, relationships, keys, and normalized CSV contracts. |
+| [Dashboard](docs/dashboard.md) | Pages, query behavior, interpretation, and access boundaries. |
+| [Operations](docs/operations.md) | Health, logs, backup, restore, upgrades, and capacity. |
+| [Deployment](docs/deployment.md) | Compose, native Python, Apptainer, and production checklist. |
+| [Security](docs/security.md) | Credentials, networking, permissions, logs, and supply chain. |
+| [Troubleshooting](docs/troubleshooting.md) | Diagnostic procedures for common failures. |
+| [Development](docs/development.md) | Extension points and safe maintenance practices. |
+
 ## Save instruments and chemistry reference tables
 
 Before loading any sequencing runs, you must load the reference tables for instruments and sequencing chemistry into the database.
 
-Place the reference CSV files here:
+Place the normalized reference CSV files directly in `PROCESSED_DATA_DIR`
+(by default `../NGS_Data/processed`):
 
 ```text
-../NGS_Data/raw_data/illumina/reference_tables/
+../NGS_Data/processed/
 ├── sequencing_instruments.csv
-└── sequencing_chemistry.csv
+├── sequencing_chemistry.csv
+└── library.csv
 ```
 
 ### sequencing_instruments.csv format
@@ -127,17 +174,18 @@ ION_520,Ion 520 Chip,THERMOFISHER
 Then run:
 
 ```bash
-make load-reference
+illuqc load-lab-data
 ```
 
-This loads both `sequencing_instruments.csv` and `sequencing_chemistry.csv` into the database.
+This loads available instrument, chemistry, and library reference CSVs. Missing
+files are skipped with a warning recorded in the loader output.
 
 ## Parse one Illumina run
 
 Place the run folder outside the repository:
 
 ```text
-../NGS_Data/raw_data/Runs_Data/RUN_ID/
+../NGS_Data/raw_data/illumina/RUN_ID/
 ```
 
 Then run:
@@ -149,8 +197,8 @@ make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
 The parser writes output to:
 
 ```text
-../IlluQC_Data/processed/Runs_Data/
-../IlluQC_Data/logs/parser/
+../NGS_Data/processed/Runs_Data/
+../NGS_Data/logs/parser/
 ```
 
 ## Parse multiple runs
@@ -158,7 +206,7 @@ The parser writes output to:
 To parse all run folders at once, place all raw run folders in:
 
 ```text
-../NGS_Data/raw_data/Runs_Data/
+../NGS_Data/raw_data/illumina/
 ├── RUN_001/
 │   ├── RunInfo.xml
 │   ├── RunParameters.xml
@@ -173,7 +221,7 @@ To parse all run folders at once, place all raw run folders in:
 Then run:
 
 ```bash
-make parse-all
+illuqc parse-illumina-runs
 ```
 
 ## Parse a Thermo Fisher run
@@ -238,7 +286,7 @@ RUN_002,MiSeq validation run
 RUN_003,Quality control re-sequencing
 ```
 
-When `parse-all` runs, it will:
+When `parse-illumina-runs` runs, it will:
 - Read descriptions from the manifest if it exists
 - Use the descriptions for each matching run
 - Parse runs without manifest entries with no description (backward compatible)
@@ -272,7 +320,7 @@ To load all processed runs at once, place all processed run folders in:
 Then run:
 
 ```bash
-make load-all
+illuqc load-runs
 ```
 
 This will load all sequencing runs, samples, and QC metrics from the processed directory into the database.
@@ -282,7 +330,7 @@ This will load all sequencing runs, samples, and QC metrics from the processed d
 After parsing sample metadata and QC metrics files, load them into the database:
 
 ```bash
-make load-sample-data
+illuqc ingest-samples RUN_ID
 ```
 
 This loads:
@@ -300,7 +348,7 @@ make backup
 Restore a backup:
 
 ```bash
-make restore BACKUP=../IlluQC_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
+make restore BACKUP=../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
 ```
 
 ## Useful commands
@@ -312,14 +360,15 @@ make reset                    # Stop services and remove containers/volumes
 make logs                     # Follow Docker logs
 make db-shell                 # Open PostgreSQL shell
 make parse RUN_ID=...         # Parse one Illumina run
-make parse-all                # Parse all run folders
-make parse-multiqc-all        # Parse MultiQC data for all runs
-make parse-sample-metadata-all # Parse sample metadata for all runs
+illuqc parse-illumina-runs    # Parse all Illumina run folders
+illuqc validate-samples RUN_ID # Validate sample inputs without writing
+illuqc prepare-samples RUN_ID  # Create load-ready sample files
 make load RUN_ID=...          # Load one processed run
-make load-all                 # Load all processed runs
-make load-sample-data         # Load sample metadata and QC metrics
+illuqc load-runs              # Load all processed runs
+illuqc load-samples RUN_ID     # Load prepared sample metadata and QC
 make backup                   # Create DB backup
 make restore BACKUP=...       # Restore DB backup
+make audit                    # Scan Python dependencies for known vulnerabilities
 ```
 
 ## Docker vs Apptainer/Singularity

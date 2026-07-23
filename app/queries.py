@@ -62,57 +62,25 @@ def get_runs_with_instruments(engine, *, year=None):
 
 
 def get_runs_with_chemistry(engine):
-    """Sequencing runs joined with instruments, chemistry name AND attributes.
-
-    The ``sequencing_chemistry`` table provides the human-readable
-    ``chemistry_name``.  Long-format chemistry attributes (per *run_id*)
-    are pivoted into extra columns using the ``attribute_name`` from the
-    definitions table.  LEFT JOINs ensure runs without chemistry data
-    are still returned.
-    """
+    """Sequencing runs joined with instruments and chemistry names."""
     sql = """
         SELECT srq.*,
                inst.instrument_model, inst.instrument_name,
-               sc.chemistry_name,
-               cad.attribute_name,
-               sca.attribute_value
+               sc.chemistry_name
         FROM sequencing_run srq
         LEFT JOIN sequencing_chemistry sc
           ON srq.sequencing_chemistry_id = sc.sequencing_chemistry_id
         LEFT JOIN instruments inst
           ON srq.instrument_id = inst.instrument_id
-        LEFT JOIN sequencing_chemistry_attributes sca
-          ON srq.run_id = sca.run_id
-        LEFT JOIN chemistry_attribute_definitions cad
-          ON sca.attribute_id = cad.attribute_id
     """
     df = _read(engine, sql)
-    df = df.loc[:, ~df.columns.duplicated()]
-    # Pivot long-format attributes into wide columns
-    if "attribute_name" in df.columns and not df["attribute_name"].isna().all():
-        run_cols = [c for c in df.columns if c not in ("attribute_name", "attribute_value")]
-        attrs = (
-            df[["run_id", "day_id", "attribute_name", "attribute_value"]]
-            .drop_duplicates()
-            .pivot_table(
-                index=["run_id", "day_id"],
-                columns="attribute_name",
-                values="attribute_value",
-                aggfunc="first",
-            )
-            .reset_index()
-        )
-        base = df[run_cols].drop_duplicates(subset=["run_id", "day_id"])
-        df = base.merge(attrs, on=["run_id", "day_id"], how="left")
-    else:
-        df = df.drop(columns=["attribute_name", "attribute_value"], errors="ignore")
-    return df
+    return df.loc[:, ~df.columns.duplicated()]
 
 
 def get_runs_with_chemistry_protocols(engine):
     """Sequencing runs joined with instruments, chemistry – for Protocols page.
 
-    Returns the same pivoted attributes as ``get_runs_with_chemistry``."""
+    Returns the same run and chemistry columns as ``get_runs_with_chemistry``."""
     return get_runs_with_chemistry(engine)
 
 
@@ -203,7 +171,7 @@ def get_sample_qc_metrics_for_sample(engine, sample_id):
                sr.day_id, sr.run_description, sr.platform_id,
                inst.instrument_model, inst.instrument_name,
                l.library_name, l.library_type,
-               s.sex, s.clinical_test, s.registration_date, s.sample_type
+               s.sex, s.clinical_method, s.registration_date, s.sample_type
         FROM sample_qc_metrics sqm
         LEFT JOIN qc_metric_definitions qmd ON sqm.metric_id = qmd.metric_id
         JOIN sequencing_run sr ON sqm.run_id = sr.run_id
@@ -321,4 +289,3 @@ def get_top_repeated_samples(engine, limit=10):
         LIMIT :limit
     """
     return _read(engine, sql, limit=limit)
-

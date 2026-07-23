@@ -26,20 +26,6 @@ if runs_df.empty:
     st.warning("No sequencing runs found in the database.")
     st.stop()
 
-# Identify chemistry-attribute columns that were pivoted from the
-# sequencing_chemistry_attributes long-format table. Any column not in the
-# known metadata set and not in COLUMN_LABELS is assumed to be an attribute.
-_meta_cols = {
-    "run_id", "run_folder", "run_description", "day_id", "instrument_id",
-    "platform_id", "sequencing_chemistry_id", "chemistry_name",
-    "num_cycles", "num_samples",
-    "instrument_model", "instrument_name",
-}
-chemistry_attr_cols = [
-    c for c in runs_df.columns
-    if c not in _meta_cols and c not in COLUMN_LABELS
-]
-
 # Fetch long-format QC metrics and map metric IDs to human-readable labels
 metrics_df = queries.get_sequencing_metrics(engine)
 
@@ -154,11 +140,6 @@ with left_column:
             chem_name = selected_run_df["Chemistry Name"].values[0]
             if pd.notna(chem_name) and str(chem_name).strip():
                 container.write(f"**Chemistry:** {chem_name}")
-        # Show any extra chemistry attributes pivoted from the long-format table
-        for attr_col in chemistry_attr_cols:
-            val = selected_run_df[attr_col].values[0] if attr_col in selected_run_df.columns else ""
-            if pd.notna(val) and str(val).strip():
-                container.write(f"**{attr_col}:** {val}")
         container.write(f"**Number of Samples:** {selected_run_df['Number of Samples'].values[0]}")
         container.write(f"**Number of Cycles:** {selected_run_df['Number of Cycles'].values[0]}")
 

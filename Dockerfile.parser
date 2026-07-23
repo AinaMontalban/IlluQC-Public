@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /opt/ngsqc
+WORKDIR /opt/illuqc
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -9,19 +9,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY parser/ /opt/ngsqc/parser/
+COPY parser/ /opt/illuqc/parser/
 
-RUN if [ -f /opt/ngsqc/parser/Illumina_Runs/requirements.txt ]; then \
-      pip install -r /opt/ngsqc/parser/Illumina_Runs/requirements.txt; \
-    elif [ -f /opt/ngsqc/parser/requirements.txt ]; then \
-      pip install -r /opt/ngsqc/parser/requirements.txt; \
+RUN if [ -f /opt/illuqc/parser/Illumina_Runs/requirements.txt ]; then \
+      pip install --no-cache-dir -r /opt/illuqc/parser/Illumina_Runs/requirements.txt; \
+    elif [ -f /opt/illuqc/parser/requirements.txt ]; then \
+      pip install --no-cache-dir -r /opt/illuqc/parser/requirements.txt; \
     fi
 
-RUN groupadd --gid 10001 ngsqc && \
-    useradd --uid 10001 --gid ngsqc --no-create-home ngsqc && \
+RUN groupadd --gid 10001 illuqc && \
+    useradd --uid 10001 --gid illuqc --no-create-home illuqc && \
     mkdir -p /data/raw /data/processed /logs && \
-    chown -R ngsqc:ngsqc /data /logs /opt/ngsqc
+    chown -R illuqc:illuqc /data /logs /opt/illuqc
 
-USER ngsqc
+USER illuqc
 
-ENTRYPOINT ["python", "/opt/ngsqc/parser/Illumina_Runs/Illumina_sequencing_data_parser.py"]
+ENTRYPOINT ["python", "/opt/illuqc/parser/Illumina_Runs/Illumina_sequencing_data_parser.py"]

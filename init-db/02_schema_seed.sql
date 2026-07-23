@@ -109,5 +109,5 @@ ON CONFLICT (metric_id) DO NOTHING;
 
 INSERT INTO schema_metadata (key, value) VALUES
 ('schema_name', 'IlluQC Database'),
-('schema_version', '1.5-multiplatform-longformat-library')
+('schema_version', '1.0')
 ON CONFLICT (key) DO NOTHING;

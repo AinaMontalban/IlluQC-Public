@@ -1,211 +1,114 @@
 # IlluQC installation guide
 
-This guide explains how to install and run IlluQC with Docker Compose while keeping all data outside the repository and outside the containers.
+This guide covers the recommended Docker Compose installation. Native Python
+and Apptainer/Singularity options are documented in
+[INSTALLATION_OPTIONS.md](INSTALLATION_OPTIONS.md).
 
-## 1. Requirements
+For architecture, configuration, workflow, data-model, operations, security,
+and troubleshooting references, see the [documentation index](docs/README.md).
 
-Install:
+## Requirements
 
 - Git
-- Docker
-- Docker Compose v2
+- Docker with Docker Compose v2
 - Make
 
-Check versions:
+IlluQC invokes Compose through `scripts/runtime/compose.sh`. The wrapper prefers v2 and
+falls back to the legacy `docker-compose` executable when required.
 
-```bash
-git --version
-docker --version
-docker compose version
-make --version
-```
-
-## 2. Clone the repository
+## Configure IlluQC
 
 ```bash
 git clone <repo-url> IlluQC
 cd IlluQC
-```
-
-## 3. Configure environment variables
-
-```bash
 cp .env.example .env
 ```
 
-Edit `.env` if needed. The most important variable is:
+Edit `.env` and replace `POSTGRES_PASSWORD` with a long random password. The
+external paths default to directories below `../NGS_Data`; adjust them before
+starting services if your data belongs elsewhere.
 
-```bash
-ILLUQC_DATA_ROOT=../IlluQC_Data
-```
-
-By default, IlluQC expects the external data directory next to the repository.
-
-## 4. Create external data folders
+Create the external directories and start PostgreSQL and Streamlit:
 
 ```bash
 make setup-data-dirs
+make up
 ```
 
-This creates:
+The dashboard is available at <http://localhost:8501>. PostgreSQL data is
+persisted at `POSTGRES_DATA_DIR`, outside the repository and containers.
 
-```text
-../IlluQC_Data/raw/
-../IlluQC_Data/processed/
-../IlluQC_Data/logs/
-../IlluQC_Data/backups/
-../IlluQC_Data/postgres_data/
-../IlluQC_Data/config/
-```
+## Input layout
 
-## 5. Add input data
-
-Put Illumina run folders here:
+Place Illumina runs at:
 
 ```text
 ../NGS_Data/raw_data/illumina/RUN_ID/
+├── RunInfo.xml
+├── RunParameters.xml
+├── SampleSheet.csv
+└── InterOp/
 ```
 
-Each run folder should contain:
+Place Thermo Fisher JSON exports below:
 
 ```text
-RunInfo.xml
-RunParameters.xml
-SampleSheet.csv
-InterOp/
+../NGS_Data/raw_data/thermofisher/
 ```
 
-Put reference tables here:
+Place reference tables at:
 
 ```text
-../NGS_Data/raw_data/illumina/reference_tables/sequencing_instruments.csv
-../NGS_Data/raw_data/illumina/reference_tables/sequencing_chemistry.csv
+../NGS_Data/raw_data/illumina/reference_tables/
+├── sequencing_instruments.csv
+└── sequencing_chemistry.csv
 ```
 
-## 6. Build and start services
+## Common workflow
 
 ```bash
-make up
-```
-
-This starts PostgreSQL and Streamlit. Streamlit is available at:
-
-```text
-http://localhost:8501
-```
-
-## 7. Parse one run
-
-```bash
+illuqc load-lab-data
 make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
-```
-
-Expected outputs:
-
-```text
-../IlluQC_Data/processed/Runs_Data/RUN_ID-sequencing-info.csv
-../IlluQC_Data/processed/Runs_Data/RUN_ID-sequencing-metrics.csv
-../IlluQC_Data/logs/parser/RUN_ID_parser.log
-```
-
-## 8. Load reference tables
-
-```bash
-make load-reference
-```
-
-## 9. Load one run
-
-```bash
 make load RUN_ID=RUN_ID
 ```
 
-This attempts to load:
-
-```text
-RUN_ID-sequencing-info.csv
-RUN_ID-sequencing-metrics.csv
-RUN_ID-samples-metadata.csv
-RUN_ID-samples-qc-metrics.csv
-```
-
-Missing optional files are skipped with a warning.
-
-## 10. Load all processed runs
+Thermo Fisher exports can be parsed with:
 
 ```bash
-make load-all
+make parse-thermofisher JSON_FILE=serialized_run.json MODEL=S5
+make parse-thermofisher-all MODEL=AUTO
 ```
 
-## 11. Backup database
+Processed output is written below `../NGS_Data/processed`; logs are written
+below `../NGS_Data/logs`.
+
+## Backup and restore
 
 ```bash
 make backup
+make restore BACKUP=../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
 ```
 
-Backups are written to:
+Restore drops and recreates the configured database. Keep independent,
+regularly verified copies of important backups.
 
-```text
-../IlluQC_Data/backups/
-```
+## Troubleshooting
 
-## 12. Restore database
+Inspect service state and logs:
 
 ```bash
-make restore BACKUP=../IlluQC_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
-```
-
-Warning: restore drops and recreates the configured database.
-
-## 13. Troubleshooting
-
-### PostgreSQL does not start
-
-Check logs:
-
-```bash
+./scripts/runtime/compose.sh ps
 make logs
+bash scripts/runtime/wait_for_database.sh
 ```
 
-If the database directory was created with incompatible data, remove it carefully:
+The Compose database host is `db`. Confirm that `.env` defines the same
+`POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` values used when the
+database directory was first initialized. Changing initialization credentials
+does not rewrite an existing PostgreSQL data directory.
+
+To stop services without deleting persistent data:
 
 ```bash
 make down
-rm -rf ../IlluQC_Data/postgres_data/*
-make up
 ```
-
-### Parser cannot find a run folder
-
-Check that the run exists on the host:
-
-```bash
-ls ../NGS_Data/raw_data/Runs_Data/RUN_ID
-```
-
-And that it contains:
-
-```text
-RunInfo.xml
-RunParameters.xml
-SampleSheet.csv
-InterOp/
-```
-
-### Loader cannot connect to PostgreSQL
-
-Check that the database is healthy:
-
-```bash
-bash scripts/wait_for_db.sh
-```
-
-### Streamlit cannot connect to database
-
-Check `.env`:
-
-```bash
-ILLUQC_DB_URL=postgresql://postgres:postgres@db:5432/illuqcdb
-```
-
-Inside Docker Compose, the database host should be `db`, not `localhost`.

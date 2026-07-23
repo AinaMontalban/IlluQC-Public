@@ -118,8 +118,7 @@ def parse_serialized_json(json_path):
 
     Reads the array of ``{model, pk, fields}`` objects and collects
     fields from the relevant models (experiment, plannedexperiment,
-    experimentanalysissettings, analysismetrics, libmetrics, qualitymetrics,
-    sample).
+    analysismetrics, libmetrics, qualitymetrics, and sample).
 
     Args:
         json_path: Path to the ``serialized_*.json`` file.
@@ -135,7 +134,6 @@ def parse_serialized_json(json_path):
 
     exp = _get_model_fields(data, "rundb.experiment")
     plan = _get_model_fields(data, "rundb.plannedexperiment")
-    eas = _get_model_fields(data, "rundb.experimentanalysissettings")
     am = _get_model_fields(data, "rundb.analysismetrics")
     lm = _get_model_fields(data, "rundb.libmetrics")
     qm = _get_model_fields(data, "rundb.qualitymetrics")
@@ -217,12 +215,6 @@ def parse_plan_json(json_path):
     day_id = normalize_day_id(data.get("executionDate") or data.get("resultDate"))
     instrument_id = data.get("pgmName", "")
     flows = data.get("flows", 0)
-
-    # Chip info from experimentChips
-    chip_barcode = ""
-    exp_chips = data.get("experimentChips", [])
-    if exp_chips:
-        chip_barcode = exp_chips[0].get("topChipBarcode", "")
 
     # Chemistry ID from chipType (Genexus Plan files have no flowcell/reagent)
     chip_type = data.get("chipType", "")

@@ -1,0 +1,6 @@
+sample_id	library_id	run_id
+S043	HLA	R009
+S044	HLA	R009
+S045	HLA	R009
+S046	HLA	R009
+S047	HLA	R009

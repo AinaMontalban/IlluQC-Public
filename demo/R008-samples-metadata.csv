@@ -1,0 +1,7 @@
+sample_id,sex,registration_date,clinical_method,sample_type
+S037,M,2025-05-10,ALLOSEQ,Blood
+S038,F,2025-05-09,ALLOSEQ,Saliva
+S039,Unknown,2025-05-08,ALLOSEQ,FFPE
+S040,M,2025-05-07,ALLOSEQ,Cell Line
+S041,F,2025-05-06,ALLOSEQ,Blood
+S042,Unknown,2025-05-05,ALLOSEQ,Saliva

@@ -1,0 +1,284 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+if [ -f .env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env
+  set +a
+fi
+
+COMPOSE=(bash "$ROOT_DIR/scripts/runtime/compose.sh")
+
+usage() {
+  cat <<'HELP'
+IlluQC command-line interface
+
+Usage:
+  illuqc COMMAND [ARGUMENTS]
+
+Setup and services:
+  setup                         Create external data directories
+  start                         Build and start PostgreSQL and Streamlit
+  stop                          Stop services without deleting database data
+  restart                       Restart the services
+  status                        Show service status
+  logs [SERVICE]                Follow all logs or one service's logs
+  config                        Validate and print the resolved Compose config
+  dashboard                     Start Streamlit and print its URL
+
+Load lab data (sequencers, chemistry kits, and libraries) 
+  load-lab-data                 Load instruments, chemistry, and libraries
+
+Parse run sequencing data from Illumina:
+  parse RUN_ID [DESCRIPTION]    Parse one Illumina run
+  parse-illumina-runs           Parse every Illumina run folder
+
+Load parsed run data into the database:
+  load RUN_ID                   Load one parsed run
+  load-runs                     Load every parsed run
+
+Parse and then load one run in a single command:
+  ingest RUN_ID [DESCRIPTION]   Parse and then load one Illumina run
+
+Development* --> Parse run sequencing data from Thermo Fisher S5/Genexus:
+  * parse-thermofisher FILE [MODEL] [DESCRIPTION]
+                                Parse one S5/Genexus JSON export
+  * parse-thermofisher-all [MODEL] [DESCRIPTION]
+                                Parse all matching Thermo Fisher exports
+
+Sample-level data:
+  validate-samples RUN_ID       Check metadata, MultiQC, and libraries
+  prepare-samples RUN_ID [--force]
+                                Create validated load-ready files for one run
+  load-samples RUN_ID           Load prepared samples for one run
+  ingest-samples RUN_ID [--force]
+                                Prepare and load samples for one run
+  validate-sample RUN_ID SAMPLE_ID
+  prepare-sample RUN_ID SAMPLE_ID [OPTIONS]
+  load-sample RUN_ID SAMPLE_ID
+  ingest-sample RUN_ID SAMPLE_ID [OPTIONS]
+                                Equivalent single-sample operations
+
+  Recommended single-sample options:
+    --sex VALUE                 Sample sex (required)
+    --library-id ID             Library identifier (required)
+    --metrics-file FILE         MultiQC statistics TSV;
+    --clinical-method VALUE     Optional clinical method metadata
+    --sample-type VALUE         Optional sample type metadata
+    --force                     Replace existing prepared files
+  prepare-samples-all [--force] Prepare every Illumina run
+  load-samples-all              Load every prepared run
+
+Database and maintenance:
+  wait-db                       Wait until PostgreSQL is ready
+  db-shell                      Open an interactive PostgreSQL shell
+  backup                        Create a compressed database backup
+  restore BACKUP                Restore a backup (destructive)
+  demo                          Load the synthetic demonstration dataset
+  audit                         Scan Python dependencies with pip-audit
+  version                       Print the configured IlluQC version
+  help                          Show this help
+
+Examples:
+  illuqc start
+  illuqc load-lab-data
+  illuqc parse RUN_001 "WES validation run"
+  illuqc load RUN_001
+  illuqc status
+  illuqc backup
+HELP
+}
+
+require_arg() {
+  local value="${1:-}"
+  local label="$2"
+  if [ -z "$value" ]; then
+    echo "ERROR: missing $label" >&2
+    usage >&2
+    exit 2
+  fi
+}
+
+command_name="${1:-help}"
+[ "$#" -gt 0 ] && shift
+
+case "$command_name" in
+  help|-h|--help)
+    usage
+    ;;
+  version|--version)
+    echo "IlluQC ${ILLUQC_VERSION:-0.1.0}"
+    ;;
+  setup)
+    bash scripts/runtime/setup_data_directories.sh
+    ;;
+  start|up)
+    "${COMPOSE[@]}" up -d --build
+    echo "IlluQC started. Dashboard: http://localhost:${STREAMLIT_PORT:-8501}"
+    ;;
+  stop|down)
+    "${COMPOSE[@]}" down
+    ;;
+  restart)
+    "${COMPOSE[@]}" down
+    "${COMPOSE[@]}" up -d --build
+    ;;
+  status|ps)
+    "${COMPOSE[@]}" ps
+    ;;
+  logs)
+    if [ "$#" -gt 0 ]; then
+      "${COMPOSE[@]}" logs -f "$1"
+    else
+      "${COMPOSE[@]}" logs -f
+    fi
+    ;;
+  config)
+    "${COMPOSE[@]}" config
+    ;;
+  dashboard|app)
+    "${COMPOSE[@]}" up -d --build streamlit
+    echo "Dashboard: http://localhost:${STREAMLIT_PORT:-8501}"
+    ;;
+  load-lab-data)
+    bash scripts/lab/load_lab_data.sh
+    ;;
+  load-reference)
+    echo "WARNING: 'load-reference' is deprecated; use 'load-lab-data'." >&2
+    bash scripts/lab/load_lab_data.sh
+    ;;
+  parse)
+    require_arg "${1:-}" "RUN_ID"
+    run_id="$1"
+    shift
+    bash scripts/runs/parse_illumina_run.sh "$run_id" "$*"
+    ;;
+  parse-illumina-runs)
+    bash scripts/runs/parse_illumina_runs.sh
+    ;;
+  parse-thermofisher)
+    require_arg "${1:-}" "JSON file"
+    json_file="$1"
+    model="${2:-AUTO}"
+    [ "$#" -gt 0 ] && shift
+    [ "$#" -gt 0 ] && shift
+    [ "$model" = "AUTO" ] && model=""
+    bash scripts/runs/parse_thermofisher_run.sh "$json_file" "$*" "$model"
+    ;;
+  parse-thermofisher-all)
+    model="${1:-AUTO}"
+    [ "$#" -gt 0 ] && shift
+    bash scripts/runs/parse_thermofisher_runs.sh "$*" "$model"
+    ;;
+  load)
+    require_arg "${1:-}" "RUN_ID"
+    bash scripts/runs/load_run.sh "$1"
+    ;;
+  load-runs)
+    bash scripts/runs/load_runs.sh
+    ;;
+  load-all)
+    echo "WARNING: 'load-all' is deprecated; use 'load-runs'." >&2
+    bash scripts/runs/load_runs.sh
+    ;;
+  ingest)
+    require_arg "${1:-}" "RUN_ID"
+    run_id="$1"
+    shift
+    bash scripts/runs/parse_illumina_run.sh "$run_id" "$*"
+    bash scripts/runs/load_run.sh "$run_id"
+    ;;
+  validate-samples)
+    require_arg "${1:-}" "RUN_ID"
+    bash scripts/samples/validate_run_samples.sh "$1"
+    ;;
+  prepare-samples)
+    require_arg "${1:-}" "RUN_ID"
+    bash scripts/samples/prepare_run_samples.sh "$1" "" "${2:-}"
+    ;;
+  load-samples)
+    require_arg "${1:-}" "RUN_ID"
+    bash scripts/samples/load_run_samples.sh "$1"
+    ;;
+  ingest-samples)
+    require_arg "${1:-}" "RUN_ID"
+    bash scripts/samples/prepare_run_samples.sh "$1" "" "${2:-}"
+    bash scripts/samples/load_run_samples.sh "$1"
+    ;;
+  validate-sample)
+    require_arg "${1:-}" "RUN_ID"
+    require_arg "${2:-}" "SAMPLE_ID"
+    bash scripts/samples/validate_run_samples.sh "$1" "$2"
+    ;;
+  prepare-sample|parse-sample)
+    require_arg "${1:-}" "RUN_ID"
+    require_arg "${2:-}" "SAMPLE_ID"
+    [ "$command_name" = "parse-sample" ] && echo "WARNING: 'parse-sample' is deprecated; use 'prepare-sample'." >&2
+    run_id="$1"
+    sample_id="$2"
+    shift 2
+    if [ "$#" -gt 1 ] || { [ "$#" -eq 1 ] && [ "$1" != "--force" ]; }; then
+      bash scripts/samples/prepare_sample.sh "$run_id" "$sample_id" "$@"
+    else
+      bash scripts/samples/prepare_run_samples.sh "$run_id" "$sample_id" "${1:-}"
+    fi
+    ;;
+  load-sample)
+    require_arg "${1:-}" "RUN_ID"
+    require_arg "${2:-}" "SAMPLE_ID"
+    bash scripts/samples/load_run_samples.sh "$1" "$2"
+    ;;
+  ingest-sample)
+    require_arg "${1:-}" "RUN_ID"
+    require_arg "${2:-}" "SAMPLE_ID"
+    run_id="$1"
+    sample_id="$2"
+    shift 2
+    if [ "$#" -gt 1 ] || { [ "$#" -eq 1 ] && [ "$1" != "--force" ]; }; then
+      bash scripts/samples/prepare_sample.sh "$run_id" "$sample_id" "$@"
+    else
+      bash scripts/samples/prepare_run_samples.sh "$run_id" "$sample_id" "${1:-}"
+    fi
+    bash scripts/samples/load_run_samples.sh "$run_id" "$sample_id"
+    ;;
+  prepare-samples-all)
+    bash scripts/samples/prepare_all_run_samples.sh "${1:-}"
+    ;;
+  load-samples-all)
+    bash scripts/samples/load_all_run_samples.sh
+    ;;
+  wait-db)
+    bash scripts/runtime/wait_for_database.sh
+    ;;
+  db-shell)
+    # shellcheck source=scripts/lib/common.sh
+    source scripts/lib/common.sh
+    load_env
+    compose exec db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+    ;;
+  backup)
+    bash scripts/database/backup_database.sh
+    ;;
+  restore)
+    require_arg "${1:-}" "backup path"
+    bash scripts/database/restore_database.sh "$1"
+    ;;
+  demo)
+    bash scripts/database/load_demo_data.sh
+    ;;
+  audit)
+    python -m pip_audit \
+      -r app/requirements.txt \
+      -r db/requirements.txt \
+      -r parser/Illumina_Runs/requirements.txt
+    ;;
+  *)
+    echo "ERROR: unknown IlluQC command: $command_name" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

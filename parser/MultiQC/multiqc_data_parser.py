@@ -62,7 +62,8 @@ def load_config(config_path):
 # ---------------------------------------------------------------------------
 def parse_multiqc_general_stats(
     stats_path,
-    config
+    config,
+    sample_filter=None,
 ):
     """
     Parse *multiqc_general_stats.txt* and return per-sample metrics.
@@ -90,6 +91,9 @@ def parse_multiqc_general_stats(
             raw_sample = row.get("Sample", "")
             sample_id = sample_base_name(raw_sample)
             read = detect_read(raw_sample)
+
+            if sample_filter and sample_id != sample_filter:
+                continue
             
             # Skip undetermined samples (they won't have library_id)
             if sample_id.upper().startswith("UNDETERMINED"):
@@ -104,7 +108,10 @@ def parse_multiqc_general_stats(
                 try:
                     # Concatenate metric_id with read (e.g., FASTQC_AVG_SEQUENCE_LENGTH_R1)
                     combined_metric_id = metric_id + "_" + read if read else metric_id
-                    print(f"Adding metric: sample_id={sample_id}, read={read}, metric_id={combined_metric_id}, value_number={val}")
+                    logging.debug(
+                        "Adding metric: sample_id=%s, read=%s, metric_id=%s, value_number=%s",
+                        sample_id, read, combined_metric_id, val,
+                    )
                     sample_metrics.append({
                         "sample_id": sample_id,
                         "metric_id": combined_metric_id,
@@ -180,6 +187,11 @@ def main():
         default="INFO",
         help="Logging level (DEBUG, INFO, WARNING, ERROR).",
     )
+    parser.add_argument(
+        "--sample-id",
+        default=None,
+        help="Only parse metrics for this normalized sample ID.",
+    )
 
     if len(os.sys.argv) == 1:
         parser.print_help()
@@ -200,10 +212,18 @@ def main():
     logging.debug("Loaded config from %s", config_path)
 
     # ── Parse ──────────────────────────────────────────────────────
-    result = parse_multiqc_general_stats(fastqc_path, config)
+    result = parse_multiqc_general_stats(
+        fastqc_path,
+        config,
+        sample_filter=args.sample_id,
+    )
     run_id = args.run_id
     num_samples = result["num_samples"]
     sample_metrics = result["sample_metrics"]
+
+    if args.sample_id and not sample_metrics:
+        logging.error("Sample ID not found in MultiQC statistics: %s", args.sample_id)
+        return 2
 
     logging.info("Parsed %d sample-metric rows for run %s", len(sample_metrics), run_id)
     logging.info("Detected %d samples", num_samples)
@@ -213,7 +233,8 @@ def main():
         output_dir = Path(args.output_dir) if args.output_dir else fastqc_path.resolve().parent
         suffixes = config.get("output_suffixes", {})
 
-        sample_path = output_dir / f"{run_id}{suffixes.get('sample_qc_metrics', '-samples-qc-metrics.csv')}"
+        output_stem = f"{run_id}-{args.sample_id}" if args.sample_id else run_id
+        sample_path = output_dir / f"{output_stem}{suffixes.get('sample_qc_metrics', '-samples-qc-metrics.csv')}"
 
         write_sample_qc_metrics(
             run_id=run_id,
@@ -229,7 +250,8 @@ def main():
             "sample_metrics": sample_metrics,
         }
         print(json.dumps(payload, indent=2, default=str))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,10 +1,8 @@
 {
-  "samples": ["sample_id", "sex", "registration_date", "clinical_test", "sample_type"],
+  "samples": ["sample_id", "sex"],
   "runs": ["run_id", "run_description", "run_type"],
   "instruments": ["instrument_id", "instrument_name", "instrument_type"],
   "sequencing_chemistry": ["sequencing_chemistry_id", "chemistry_name", "platform_id"],
-  "chemistry_attribute_definitions": ["attribute_id", "attribute_name", "platform_id", "description"],
-  "sequencing_chemistry_attributes": ["run_id", "attribute_id", "attribute_value"],
   "library": ["library_id", "library_name", "library_version", "library_type"],
   "protocols": ["protocol_id", "protocol_name", "protocol_type", "version", "description"],
   "extraction_qc": ["sample_id", "day_id", "concentration", "a260_a280_ratio", "a260_a230_ratio"],

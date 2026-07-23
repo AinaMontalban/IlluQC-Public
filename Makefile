@@ -5,14 +5,14 @@ include .env
 export
 endif
 
-COMPOSE ?= docker compose
+COMPOSE ?= bash scripts/runtime/compose.sh
 
-.PHONY: setup-data-dirs up down reset logs db-shell app \
-        parse parse-thermofisher parse-thermofisher-all parse-all parse-multiqc-all parse-sample-metadata-all add-sample-qc-libraries load-reference load load-all load-sample-data load-sample-qc-metrics \
+.PHONY: setup-data-dirs up down reset logs db-shell app audit \
+        parse parse-thermofisher parse-thermofisher-all parse-illumina-runs parse-all validate-samples prepare-samples load-samples ingest-samples validate-sample prepare-sample load-sample ingest-sample prepare-samples-all load-samples-all parse-sample load-lab-data load-reference load load-runs load-all load-sample-data load-sample-qc-metrics \
         backup restore wait-for-db demo
 
 setup-data-dirs:
-	bash scripts/setup_data_dirs.sh
+	bash scripts/runtime/setup_data_directories.sh
 
 up:
 	$(COMPOSE) up --build
@@ -30,52 +30,94 @@ logs:
 	$(COMPOSE) logs -f
 
 db-shell:
-	$(COMPOSE) exec db psql -U "$${POSTGRES_USER:-postgres}" -d "$${POSTGRES_DB:-illuqcdb}"
+	$(COMPOSE) exec db psql -U "$${POSTGRES_USER:-illuqc}" -d "$${POSTGRES_DB:-illuqcdb}"
+
+audit:
+	python -m pip_audit -r app/requirements.txt -r db/requirements.txt -r parser/Illumina_Runs/requirements.txt
 
 wait-for-db:
-	bash scripts/wait_for_db.sh
+	bash scripts/runtime/wait_for_database.sh
 
 parse:
-	bash scripts/parse_run.sh "$(RUN_ID)" "$(DESCRIPTION)"
+	bash scripts/runs/parse_illumina_run.sh "$(RUN_ID)" "$(DESCRIPTION)"
 
 parse-thermofisher:
-	bash scripts/parse_thermofisher_run.sh "$(JSON_FILE)" "$(DESCRIPTION)" "$(MODEL)"
+	bash scripts/runs/parse_thermofisher_run.sh "$(JSON_FILE)" "$(DESCRIPTION)" "$(MODEL)"
 
 parse-thermofisher-all:
-	bash scripts/parse_thermofisher_all.sh "$(DESCRIPTION)" "$(MODEL)"
+	bash scripts/runs/parse_thermofisher_runs.sh "$(DESCRIPTION)" "$(MODEL)"
+
+parse-illumina-runs:
+	bash scripts/runs/parse_illumina_runs.sh
 
 parse-all:
-	bash scripts/parse_all_runs.sh
+	@echo "WARNING: 'make parse-all' is deprecated; use 'make parse-illumina-runs'." >&2
+	bash scripts/runs/parse_illumina_runs.sh
 
-parse-multiqc-all:
-	bash scripts/parse_multiqc_all.sh
+parse-sample:
+	@echo "WARNING: 'make parse-sample' is deprecated; use 'make prepare-sample'." >&2
+	bash scripts/samples/prepare_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)" "$(FORCE)"
 
-parse-sample-metadata-all:
-	bash scripts/parse_sample_metadata_all.sh
+validate-samples:
+	bash scripts/samples/validate_run_samples.sh "$(RUN_ID)"
 
-add-sample-qc-libraries:
-	bash scripts/add_libraries_to_sample_qc.sh
+prepare-samples:
+	bash scripts/samples/prepare_run_samples.sh "$(RUN_ID)" "" "$(FORCE)"
+
+load-samples:
+	bash scripts/samples/load_run_samples.sh "$(RUN_ID)"
+
+ingest-samples:
+	bash scripts/samples/prepare_run_samples.sh "$(RUN_ID)" "" "$(FORCE)"
+	bash scripts/samples/load_run_samples.sh "$(RUN_ID)"
+
+validate-sample:
+	bash scripts/samples/validate_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)"
+
+prepare-sample:
+	bash scripts/samples/prepare_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)" "$(FORCE)"
+
+load-sample:
+	bash scripts/samples/load_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)"
+
+ingest-sample:
+	bash scripts/samples/prepare_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)" "$(FORCE)"
+	bash scripts/samples/load_run_samples.sh "$(RUN_ID)" "$(SAMPLE_ID)"
+
+prepare-samples-all:
+	bash scripts/samples/prepare_all_run_samples.sh "$(FORCE)"
+
+load-samples-all:
+	bash scripts/samples/load_all_run_samples.sh
+
+load-lab-data:
+	bash scripts/lab/load_lab_data.sh
 
 load-reference:
-	bash scripts/load_reference_tables.sh
+	@echo "WARNING: 'make load-reference' is deprecated; use 'make load-lab-data'." >&2
+	bash scripts/lab/load_lab_data.sh
 
 load:
-	bash scripts/load_run.sh "$(RUN_ID)"
+	bash scripts/runs/load_run.sh "$(RUN_ID)"
+
+load-runs:
+	bash scripts/runs/load_runs.sh
 
 load-all:
-	bash scripts/load_all_runs.sh
+	@echo "WARNING: 'make load-all' is deprecated; use 'make load-runs'." >&2
+	bash scripts/runs/load_runs.sh
 
 load-sample-data:
-	bash scripts/load_sample_data.sh
+	bash scripts/legacy/load_sample_data.sh
 
 load-sample-qc-metrics:
-	bash scripts/load_sample_qc_metrics.sh
+	bash scripts/legacy/load_sample_qc_metrics.sh
 
 backup:
-	bash scripts/backup_db.sh
+	bash scripts/database/backup_database.sh
 
 restore:
-	bash scripts/restore_db.sh "$(BACKUP)"
+	bash scripts/database/restore_database.sh "$(BACKUP)"
 
 demo:
-	bash scripts/load_demo.sh
+	bash scripts/database/load_demo_data.sh

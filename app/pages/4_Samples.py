@@ -78,7 +78,7 @@ runs_for_sample = (
     metrics_df[["run_id", "day_id", "run_description",
                  "platform_id", "instrument_name", "instrument_model",
                  "library_id", "library_name", "library_type",
-                 "sex", "clinical_test", "registration_date", "sample_type"]]
+                 "sex", "clinical_method", "registration_date", "sample_type"]]
     .drop_duplicates()
     .sort_values("day_id", ascending=False)
 )
@@ -113,7 +113,7 @@ def render_run_tab(run_id, run_metrics_df, run_info, show_metrics_table=False, s
             if pd.notna(sex) and str(sex).strip():
                 sample_card.write(f"**Sex:** {sex}")
 
-            vpanel = run_info.get("clinical_test", "")
+            vpanel = run_info.get("clinical_method", "")
             if pd.notna(vpanel) and str(vpanel).strip():
                 sample_card.write(f"**Method:** {vpanel}")
 
@@ -279,7 +279,7 @@ else:
         if pd.notna(sex) and str(sex).strip():
             sample_card.write(f"**Sex:** {sex}")
 
-        vpanel = runs_for_sample.iloc[0].get("clinical_test", "")
+        vpanel = runs_for_sample.iloc[0].get("clinical_method", "")
         if pd.notna(vpanel) and str(vpanel).strip():
             sample_card.write(f"**Method:** {vpanel}")
 

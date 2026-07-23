@@ -5,6 +5,7 @@ import pandas as pd
 import altair as alt
 
 from db import get_engine
+from errors import show_data_error
 import queries
 
 st.set_page_config(page_title="Libraries", layout="wide")
@@ -16,8 +17,8 @@ engine = get_engine()
 libraries_df = None
 try:
     libraries_df = pd.read_sql_query("SELECT * FROM library", engine)
-except Exception as e:
-    st.error(f"Could not load libraries table: {e}")
+except Exception as exc:
+    show_data_error("Could not load libraries table", exc)
 
 if libraries_df is None or libraries_df.empty:
     st.warning("No libraries found in the database.")
@@ -45,8 +46,8 @@ else:
     # Fetch sample QC metrics for selected libraries across runs
     try:
         df = queries.get_sample_qc_metrics_by_libraries(engine, selected_libs)
-    except Exception as e:
-        st.error(f"Could not load sample metrics for selected libraries: {e}")
+    except Exception as exc:
+        show_data_error("Could not load sample metrics for selected libraries", exc)
         df = pd.DataFrame()
 
     if df.empty:

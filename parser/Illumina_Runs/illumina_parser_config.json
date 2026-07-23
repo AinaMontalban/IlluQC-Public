@@ -13,8 +13,7 @@
   },
   "output_suffixes": {
     "sequencing_info": "-sequencing-info.csv",
-    "sequencing_metrics": "-sequencing-metrics.csv",
-    "sequencing_chemistry_attributes": "-sequencing-chemistry-attributes.csv"
+    "sequencing_metrics": "-sequencing-metrics.csv"
   },
   "fields": {
     "sequencing_metrics": ["run_id", "day_id", "metric_id", "value_number"],

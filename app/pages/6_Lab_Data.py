@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 
 from db import get_engine
+from errors import show_data_error
 
 st.set_page_config(page_title="Lab Data", layout="wide")
 st.write("# Lab Data")
@@ -50,8 +51,8 @@ with tab1:
             platform_counts.columns = ["Platform", "Count"]
             st.bar_chart(data=platform_counts.set_index("Platform"), use_container_width=True)
             
-    except Exception as e:
-        st.error(f"Could not load instruments table: {e}")
+    except Exception as exc:
+        show_data_error("Could not load instruments table", exc)
 
 
 # =============================================================================
@@ -88,8 +89,8 @@ with tab2:
             platform_counts.columns = ["Platform", "Count"]
             st.bar_chart(data=platform_counts.set_index("Platform"), use_container_width=True)
             
-    except Exception as e:
-        st.error(f"Could not load sequencing chemistry table: {e}")
+    except Exception as exc:
+        show_data_error("Could not load sequencing chemistry table", exc)
 
 
 # =============================================================================
@@ -128,8 +129,8 @@ with tab3:
                 type_counts.columns = ["Library Type", "Count"]
                 st.bar_chart(data=type_counts.set_index("Library Type"), use_container_width=True)
             
-    except Exception as e:
-        st.error(f"Could not load libraries table: {e}")
+    except Exception as exc:
+        show_data_error("Could not load libraries table", exc)
 
 
 # =============================================================================
@@ -191,5 +192,5 @@ with tab4:
                 scope_counts.columns = ["Scope", "Count"]
                 st.bar_chart(data=scope_counts.set_index("Scope"), use_container_width=True)
             
-    except Exception as e:
-        st.error(f"Could not load QC metrics table: {e}")
+    except Exception as exc:
+        show_data_error("Could not load QC metrics table", exc)

@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS instruments (
 CREATE TABLE IF NOT EXISTS samples (
     sample_id TEXT PRIMARY KEY,
     sex TEXT,                             -- e.g. 'M', 'F', 'Unknown'
-    registration_date DATE,                 -- date sample was registered in the lab
-    clinical_test TEXT,                       -- e.g. 'WES', 'WGS', 'Panel', 'Amplicon'
+    registration_date DATE NOT NULL DEFAULT CURRENT_DATE, -- date inserted into IlluQC
+    clinical_method TEXT,                     -- e.g. 'WES', 'WGS', 'Panel', 'Amplicon'
     sample_type TEXT                     -- e.g. 'Blood', 'Saliva', 'FFPE', 'Cell Line'
 );
 
@@ -134,7 +134,6 @@ CREATE TABLE IF NOT EXISTS sample_qc_metrics (
     metric_id TEXT NOT NULL,
     value_number DOUBLE PRECISION,
     PRIMARY KEY (sample_id, run_id, library_id, metric_id),
-    FOREIGN KEY (run_id) REFERENCES sequencing_run(run_id),
     FOREIGN KEY (library_id) REFERENCES library(library_id),
     FOREIGN KEY (sample_id) REFERENCES samples(sample_id),
     FOREIGN KEY (metric_id) REFERENCES qc_metric_definitions(metric_id)

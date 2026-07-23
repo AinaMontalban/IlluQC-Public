@@ -1,0 +1,2 @@
+run_id,run_folder,run_description,day_id,instrument_id,platform_id,sequencing_chemistry_id,num_cycles,num_samples
+R011,20250715_MISEQ02_011,HLA,2025-07-15,MISEQ_02,ILLUMINA,MISEQ_V2,318,5

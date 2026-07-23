@@ -1,7 +1,3 @@
 instrument_id,instrument_name,instrument_model,instrument_type,platform_id
-NOVA_01,NovaSeq 6000 Unit 1,NovaSeq 6000,Sequencer,ILLUMINA
-NOVA_02,NovaSeq 6000 Unit 2,NovaSeq 6000,Sequencer,ILLUMINA
-NOVA_03,NovaSeq 6000 Unit 3,NovaSeq 6000,Sequencer,ILLUMINA
-NOVA_04,NovaSeq 6000 Unit 4,NovaSeq 6000,Sequencer,ILLUMINA
-NEXT_01,NextSeq 2000,NextSeq 2000,Sequencer,ILLUMINA
-MISEQ_01,MiSeq Unit 1,MiSeq,Sequencer,ILLUMINA
+MISEQ_01,MiSeq 1,MiSeq,Sequencer,ILLUMINA
+MISEQ_02,MiSeq 2,MiSeq,Sequencer,ILLUMINA

@@ -47,8 +47,8 @@ python parse_sample_metadata.py \
 ### Batch processing
 
 ```bash
-INPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/NGSQC/Input_Data/Illumina_Runs_Data
-OUTPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/NGSQC/Upload_Data/Samples_Data
+INPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/IlluQC/Input_Data/Illumina_Runs_Data
+OUTPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/IlluQC/Upload_Data/Samples_Data
 
 for metadata_file in "$INPUT_DIR"/*/run_samples_servolab.txt; do
     echo $metadata_file
@@ -58,7 +58,7 @@ for metadata_file in "$INPUT_DIR"/*/run_samples_servolab.txt; do
     python parse_sample_metadata.py \
         --input-file "$metadata_file" \
         --output-file "$OUTPUT_DIR/${RUN_ID}-${FILE_NAME}-parsed.csv" \
-        --log-file "/Users/amontalban/HCB-Work/Doctorat/NGSQC/Logs_Folder/${RUN_ID}-${FILE_NAME}-samples-metadata.log"
+        --log-file "/Users/amontalban/HCB-Work/Doctorat/IlluQC/Logs_Folder/${RUN_ID}-${FILE_NAME}-samples-metadata.log"
 done
 ```
 

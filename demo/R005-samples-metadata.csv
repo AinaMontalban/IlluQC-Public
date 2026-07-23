@@ -1,0 +1,8 @@
+sample_id,sex,registration_date,clinical_method,sample_type
+S021,M,2025-03-14,HLA,Blood
+S022,F,2025-03-13,HLA,Saliva
+S023,Unknown,2025-03-12,HLA,FFPE
+S024,M,2025-03-11,HLA,Cell Line
+S025,F,2025-03-10,HLA,Blood
+S026,Unknown,2025-03-09,HLA,Saliva
+S027,M,2025-03-08,HLA,FFPE
