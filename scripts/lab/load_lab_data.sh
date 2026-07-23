@@ -31,6 +31,6 @@ load_table() {
 
 load_table instruments sequencing_instruments.csv
 load_table sequencing_chemistry sequencing_chemistry.csv
-load_table library libraries.csv
+load_table library library.csv
 
 echo "Reference table loading finished. Logs: $LOG_DIR/loader"

@@ -35,7 +35,7 @@ CONFIG_DIR=../NGS_Data/config
 Create the external directories:
 
 ```bash
-make setup-data-dirs
+./illuqc setup
 ```
 
 Raw data and generated data remain outside the repository:
@@ -82,7 +82,7 @@ Python packages.
 Audit pinned runtime dependencies before releases or deployments:
 
 ```bash
-make audit
+./illuqc audit
 ```
 
 Configure a PostgreSQL server reachable from the host. For example:
@@ -92,7 +92,7 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=illuqcdb
 POSTGRES_USER=illuqc
-POSTGRES_PASSWORD=replace-this-password
+POSTGRES_PASSWORD=replace-with-a-long-random-password
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=illuqcdb
@@ -139,8 +139,8 @@ python parser/Thermofisher_Data/ThermoFisher_sequencing_data_parser.py \
   --output-dir "$PROCESSED_DATA_DIR/Runs_Data"
 ```
 
-The current `make parse*` wrappers execute parsers through Docker Compose. Use
-the direct Python commands above on a fully native installation.
+The `illuqc parse*` commands execute parsers through Docker Compose. Use the
+direct Python commands above on a fully native installation.
 
 ## Option 2: Docker Compose
 
@@ -152,8 +152,8 @@ Prepare configuration and start the services:
 
 ```bash
 cp .env.example .env
-make setup-data-dirs
-./scripts/runtime/compose.sh up -d --build db streamlit
+./illuqc setup
+./illuqc start
 ```
 
 On Linux, set `LOCAL_UID` and `LOCAL_GID` in `.env` to the output of `id -u`
@@ -162,39 +162,36 @@ and `id -g` so bind-mounted output remains owned by your host account.
 Open <http://localhost:8501>. Confirm service status with:
 
 ```bash
-./scripts/runtime/compose.sh ps
-./scripts/runtime/compose.sh logs --tail=100 streamlit
+./illuqc status
+./illuqc logs streamlit
 ```
 
 Common operations:
 
 ```bash
 # Illumina
-make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
+./illuqc parse RUN_ID "Run description"
 
 # One Thermo Fisher export
-make parse-thermofisher \
-  JSON_FILE=serialized_run.json \
-  MODEL=S5 \
-  DESCRIPTION="Run description"
+./illuqc parse-thermofisher serialized_run.json S5 "Run description"
 
 # Every S5 export
-make parse-thermofisher-all MODEL=S5
+./illuqc parse-thermofisher-all S5
 
 # Every Genexus export
-make parse-thermofisher-all MODEL=GENEXUS
+./illuqc parse-thermofisher-all GENEXUS
 
 # Load normalized output
-make load RUN_ID=RUN_ID
+./illuqc load RUN_ID
 ```
 
 Stop services without deleting PostgreSQL data:
 
 ```bash
-./scripts/runtime/compose.sh down
+./illuqc stop
 ```
 
-Do not use `make reset` on a database that must be preserved.
+Do not run `docker compose down -v` on a database that must be preserved.
 
 ## Option 3: Apptainer or Singularity
 

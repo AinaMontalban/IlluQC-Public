@@ -4,16 +4,13 @@ Parser that extracts sample metadata from a tab-delimited file and writes it as 
 
 ## Input
 
-The parser expects a tab-delimited file with at least 4 columns:
+The parser expects a tab-delimited file with `sample_id` and `sex` columns. A
+header is recommended; legacy headerless two-column files remain supported.
 
 ```
-<sample_id>  <sex>  <column2>  <method_name>  ...
+sample_id  sex
+S001       F
 ```
-
-Column positions:
-- Column 0: `sample_id`
-- Column 1: `sex`
-- Column 3: `method_name`
 
 ## Output
 
@@ -23,7 +20,6 @@ A CSV file is generated with the following columns:
 |---|---|
 | `sample_id` | Sample identifier |
 | `sex` | Sex of the sample |
-| `method_name` | Method/protocol name |
 
 ## Installation
 
@@ -44,23 +40,9 @@ python parse_sample_metadata.py \
   --log-file "/path/to/logs/parse.log"
 ```
 
-### Batch processing
-
-```bash
-INPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/IlluQC/Input_Data/Illumina_Runs_Data
-OUTPUT_DIR=/Users/amontalban/HCB-Work/Doctorat/IlluQC/Upload_Data/Samples_Data
-
-for metadata_file in "$INPUT_DIR"/*/run_samples_servolab.txt; do
-    echo $metadata_file
-    [ -f "$metadata_file" ] || continue
-    RUN_ID=$(basename $(dirname "$metadata_file"))
-    FILE_NAME=$(basename "$metadata_file" .txt)
-    python parse_sample_metadata.py \
-        --input-file "$metadata_file" \
-        --output-file "$OUTPUT_DIR/${RUN_ID}-${FILE_NAME}-parsed.csv" \
-        --log-file "/Users/amontalban/HCB-Work/Doctorat/IlluQC/Logs_Folder/${RUN_ID}-${FILE_NAME}-samples-metadata.log"
-done
-```
+For the supported containerized workflow, prefer
+`illuqc prepare-samples RUN_ID` or `illuqc prepare-sample ...` instead of
+calling this low-level parser directly.
 
 ## Arguments reference
 
@@ -70,3 +52,4 @@ done
 | `--output-file` | Yes | — | Path to the output CSV file |
 | `--log` | No | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 | `--log-file` | No | *stderr* | Path to a log file (instead of console) |
+| `--sample-id` | No | all samples | Only emit the matching sample ID |

@@ -13,8 +13,7 @@ and troubleshooting references, see the [documentation index](docs/README.md).
 - Docker with Docker Compose v2
 - Make
 
-IlluQC invokes Compose through `scripts/runtime/compose.sh`. The wrapper prefers v2 and
-falls back to the legacy `docker-compose` executable when required.
+IlluQC invokes Docker Compose v2 through `scripts/runtime/compose.sh`.
 
 ## Configure IlluQC
 
@@ -22,6 +21,7 @@ falls back to the legacy `docker-compose` executable when required.
 git clone <repo-url> IlluQC
 cd IlluQC
 cp .env.example .env
+chmod 600 .env
 ```
 
 Edit `.env` and replace `POSTGRES_PASSWORD` with a long random password. The
@@ -31,8 +31,8 @@ starting services if your data belongs elsewhere.
 Create the external directories and start PostgreSQL and Streamlit:
 
 ```bash
-make setup-data-dirs
-make up
+./illuqc setup
+./illuqc start
 ```
 
 The dashboard is available at <http://localhost:8501>. PostgreSQL data is
@@ -56,27 +56,28 @@ Place Thermo Fisher JSON exports below:
 ../NGS_Data/raw_data/thermofisher/
 ```
 
-Place reference tables at:
+Place reference tables in `PROCESSED_DATA_DIR`:
 
 ```text
-../NGS_Data/raw_data/illumina/reference_tables/
+../NGS_Data/processed/
 ├── sequencing_instruments.csv
-└── sequencing_chemistry.csv
+├── sequencing_chemistry.csv
+└── library.csv
 ```
 
 ## Common workflow
 
 ```bash
 illuqc load-lab-data
-make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
-make load RUN_ID=RUN_ID
+illuqc parse RUN_ID "Run description"
+illuqc load RUN_ID
 ```
 
 Thermo Fisher exports can be parsed with:
 
 ```bash
-make parse-thermofisher JSON_FILE=serialized_run.json MODEL=S5
-make parse-thermofisher-all MODEL=AUTO
+illuqc parse-thermofisher serialized_run.json S5
+illuqc parse-thermofisher-all AUTO
 ```
 
 Processed output is written below `../NGS_Data/processed`; logs are written
@@ -85,8 +86,8 @@ below `../NGS_Data/logs`.
 ## Backup and restore
 
 ```bash
-make backup
-make restore BACKUP=../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
+illuqc backup
+illuqc restore ../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
 ```
 
 Restore drops and recreates the configured database. Keep independent,
@@ -98,7 +99,7 @@ Inspect service state and logs:
 
 ```bash
 ./scripts/runtime/compose.sh ps
-make logs
+illuqc logs
 bash scripts/runtime/wait_for_database.sh
 ```
 
@@ -110,5 +111,5 @@ does not rewrite an existing PostgreSQL data directory.
 To stop services without deleting persistent data:
 
 ```bash
-make down
+illuqc stop
 ```

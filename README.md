@@ -24,6 +24,7 @@ IlluQC/
 ├── parser/
 ├── db/
 ├── init-db/
+├── migrations/
 ├── scripts/
 │   ├── database/    # Backup, restore, and demo loading
 │   ├── lab/         # Laboratory reference-data loading
@@ -33,7 +34,6 @@ IlluQC/
 │   ├── runtime/     # Compose, setup, and readiness helpers
 │   ├── samples/     # Sample validation, preparation, and loading
 │   └── tools/       # Standalone maintenance/documentation utilities
-├── containers/
 ├── Dockerfile.parser
 ├── Dockerfile.loader
 ├── Dockerfile.streamlit
@@ -57,14 +57,15 @@ NGS_Data/
 │   │   │   ├── RunParameters.xml
 │   │   │   ├── SampleSheet.csv
 │   │   │   └── InterOp/
-│   │   └── reference_tables/
 │   └── thermofisher/
 │       ├── serialized_run.json
-│       ├── Plan_run.json
-│       └── reference_tables/
+│       └── Plan_run.json
 ├── processed/
 │   ├── Runs_Data/
-│   └── Samples_Data/
+│   ├── Samples_Data/
+│   ├── sequencing_instruments.csv
+│   ├── sequencing_chemistry.csv
+│   └── library.csv
 ├── logs/
 │   ├── parser/
 │   ├── loader/
@@ -103,6 +104,17 @@ Open the dashboard at:
 ```text
 http://localhost:8501
 ```
+
+To load the complete synthetic MiSeq/HLA/ALLOSEQ demonstration:
+
+```bash
+illuqc demo
+```
+
+The demo command prints resolved paths, input counts, loading phases, database
+row counts, log locations, and the dashboard URL. It refreshes the configured
+processed run and sample directories; do not point a demo deployment at
+production data directories.
 
 For complete native, Docker Compose, and Apptainer/Singularity installation
 instructions, see [INSTALLATION_OPTIONS.md](INSTALLATION_OPTIONS.md).
@@ -191,7 +203,7 @@ Place the run folder outside the repository:
 Then run:
 
 ```bash
-make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
+illuqc parse RUN_ID "Run description"
 ```
 
 The parser writes output to:
@@ -207,11 +219,11 @@ To parse all run folders at once, place all raw run folders in:
 
 ```text
 ../NGS_Data/raw_data/illumina/
-├── RUN_001/
+├── R001/
 │   ├── RunInfo.xml
 │   ├── RunParameters.xml
 │   └── InterOp/
-├── RUN_002/
+├── R002/
 │   ├── RunInfo.xml
 │   ├── RunParameters.xml
 │   └── InterOp/
@@ -230,29 +242,26 @@ Place an Ion Torrent S5 serialized JSON export or a Genexus Plan JSON export
 anywhere below `THERMOFISHER_RAW_DATA_DIR`. Then run:
 
 ```bash
-make parse-thermofisher \
-  JSON_FILE=Thermofisher_Data/serialized_run.json \
-  DESCRIPTION="Re-sequencing run"
+illuqc parse-thermofisher Thermofisher_Data/serialized_run.json S5 \
+  "Re-sequencing run"
 ```
 
 The parser detects S5 and Genexus formats automatically. To force one format:
 
 ```bash
-make parse-thermofisher \
-  JSON_FILE=Thermofisher_Data/Plan_run.json \
-  DESCRIPTION="Genexus run" \
-  MODEL=GENEXUS
+illuqc parse-thermofisher Thermofisher_Data/Plan_run.json GENEXUS \
+  "Genexus run"
 ```
 
 `MODEL` accepts `S5` or `GENEXUS`. `JSON_FILE` may be relative to
 `THERMOFISHER_RAW_DATA_DIR` or an absolute path inside it. Normalized run and metric CSVs are
-written to `PROCESSED_DATA_DIR/Runs_Data` and can be loaded with the existing
-`make load RUN_ID=...` command.
+written to `PROCESSED_DATA_DIR/Runs_Data` and can be loaded with
+`illuqc load RUN_ID`.
 
 To recursively parse every supported Thermo Fisher JSON export:
 
 ```bash
-make parse-thermofisher-all MODEL=S5
+illuqc parse-thermofisher-all S5
 ```
 
 Use `MODEL=S5` for `serialized_*.json` exports or `MODEL=GENEXUS` for
@@ -264,9 +273,7 @@ export could not be parsed. An optional description can be applied to every
 matching export:
 
 ```bash
-make parse-thermofisher-all \
-  MODEL=GENEXUS \
-  DESCRIPTION="Imported Genexus runs"
+illuqc parse-thermofisher-all GENEXUS "Imported Genexus runs"
 ```
 
 ### Optional: Use a manifest file with run descriptions
@@ -281,9 +288,9 @@ To automatically include descriptions for each run, create an optional manifest 
 
 ```csv
 RunID,RunDescription
-RUN_001,NovaSeq run from 2026-01-15
-RUN_002,MiSeq validation run
-RUN_003,Quality control re-sequencing
+R001,HLA
+R002,ALLOSEQ
+R003,HLA
 ```
 
 When `parse-illumina-runs` runs, it will:
@@ -301,7 +308,7 @@ This will parse all sequencing runs and write the processed CSV files to:
 ## Load one run into PostgreSQL
 
 ```bash
-make load RUN_ID=RUN_ID
+illuqc load RUN_ID
 ```
 
 ## Load multiple runs into PostgreSQL
@@ -310,10 +317,10 @@ To load all processed runs at once, place all processed run folders in:
 
 ```text
 ../NGS_Data/processed/Runs_Data/
-├── RUN_001-sequencing-info.csv
-├── RUN_001-sequencing-metrics.csv
-├── RUN_002-sequencing-info.csv
-├── RUN_002-sequencing-metrics.csv
+├── R001-sequencing-info.csv
+├── R001-sequencing-metrics.csv
+├── R002-sequencing-info.csv
+├── R002-sequencing-metrics.csv
 └── ...
 ```
 
@@ -323,7 +330,8 @@ Then run:
 illuqc load-runs
 ```
 
-This will load all sequencing runs, samples, and QC metrics from the processed directory into the database.
+This loads run metadata and run-level QC metrics. Sample data is loaded through
+the sample commands below.
 
 ## Load sample metadata and QC metrics
 
@@ -334,41 +342,36 @@ illuqc ingest-samples RUN_ID
 ```
 
 This loads:
-- Sample metadata (sample ID, sex, virtual panel) into the `samples` table
+- Sample metadata (`sample_id`, `sex`, `clinical_method`, and `sample_type`) into the `samples` table
 - Sample QC metrics (FastQC metrics, etc.) into the `sample_qc_metrics` table
 
 ## Backup and restore
 
-Create a backup:
-
-```bash
-make backup
-```
+Create a backup with `illuqc backup`.
 
 Restore a backup:
 
 ```bash
-make restore BACKUP=../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
+illuqc restore ../NGS_Data/backups/illuqcdb-YYYYMMDD_HHMMSS.sql.gz
 ```
 
 ## Useful commands
 
 ```bash
-make up                       # Build and start db + Streamlit
-make down                     # Stop services
-make reset                    # Stop services and remove containers/volumes
-make logs                     # Follow Docker logs
-make db-shell                 # Open PostgreSQL shell
-make parse RUN_ID=...         # Parse one Illumina run
+illuqc start                  # Build and start PostgreSQL + Streamlit
+illuqc stop                   # Stop services without deleting database data
+illuqc logs                   # Follow Docker logs
+illuqc db-shell               # Open PostgreSQL shell
+illuqc parse RUN_ID           # Parse one Illumina run
 illuqc parse-illumina-runs    # Parse all Illumina run folders
 illuqc validate-samples RUN_ID # Validate sample inputs without writing
 illuqc prepare-samples RUN_ID  # Create load-ready sample files
-make load RUN_ID=...          # Load one processed run
+illuqc load RUN_ID            # Load one processed run
 illuqc load-runs              # Load all processed runs
 illuqc load-samples RUN_ID     # Load prepared sample metadata and QC
-make backup                   # Create DB backup
-make restore BACKUP=...       # Restore DB backup
-make audit                    # Scan Python dependencies for known vulnerabilities
+illuqc backup                 # Create DB backup
+illuqc restore BACKUP         # Restore DB backup
+illuqc audit                  # Scan Python dependencies for known vulnerabilities
 ```
 
 ## Docker vs Apptainer/Singularity

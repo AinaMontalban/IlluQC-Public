@@ -139,11 +139,6 @@ def main():
     ap.add_argument("--port", default="5432", help="Postgres port")
     ap.add_argument("--db", required=True, help="Postgres database name")
     ap.add_argument("--user", default=os.getenv("POSTGRES_USER", "illuqc"), help="Postgres user")
-    ap.add_argument(
-        "--password",
-        default=os.getenv("POSTGRES_PASSWORD"),
-        help="Postgres password (prefer POSTGRES_PASSWORD; CLI values may be visible to other users)",
-    )
     ap.add_argument("--table", required=True, help="Target table name")
     ap.add_argument("--csv", required=True, help="CSV file path")
     ap.add_argument("--fields", required=True, help="JSON file mapping table, required fields list")
@@ -156,8 +151,9 @@ def main():
     ap.add_argument("--log", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR)")
     args = ap.parse_args()
 
-    if not args.password:
-        ap.error("set POSTGRES_PASSWORD or provide --password")
+    password = os.getenv("POSTGRES_PASSWORD")
+    if not password:
+        ap.error("POSTGRES_PASSWORD must be supplied through the environment")
 
     logging.basicConfig(level=args.log.upper(), format='%(levelname)s:%(message)s')
 
@@ -186,7 +182,7 @@ def main():
         port=args.port,
         dbname=args.db,
         user=args.user,
-        password=args.password
+        password=password
     )
     logging.info("Connected to database: %s", args.db)
     try:

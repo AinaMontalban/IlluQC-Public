@@ -4,14 +4,14 @@
 
 | Command | Effect |
 |---|---|
-| `make up` | Build and start services. |
-| `make app` | Build/start Streamlit and dependencies. |
-| `make down` | Stop services; host-mounted database data remains. |
-| `make logs` | Follow Compose service logs. |
-| `make db-shell` | Open `psql` in the database container. |
-| `make backup` | Create a compressed logical PostgreSQL backup. |
-| `make restore BACKUP=...` | Drop, recreate, and restore the configured database. |
-| `make audit` | Scan pinned Python dependencies with `pip-audit`. |
+| `illuqc start` | Build and start services. |
+| `illuqc dashboard` | Build/start Streamlit and dependencies. |
+| `illuqc stop` | Stop services; host-mounted database data remains. |
+| `illuqc logs [SERVICE]` | Follow Compose service logs. |
+| `illuqc db-shell` | Open `psql` in the database container. |
+| `illuqc backup` | Create a compressed logical PostgreSQL backup. |
+| `illuqc restore BACKUP` | Drop, recreate, and restore the configured database. |
+| `illuqc audit` | Scan pinned Python dependencies with `pip-audit`. |
 
 ## Health checks
 
@@ -38,7 +38,7 @@ identifiers even when credentials are sanitized.
 ## Backup
 
 ```bash
-make backup
+illuqc backup
 ```
 
 The script uses `pg_dump`, compresses the SQL stream, and names it
@@ -52,7 +52,7 @@ boundaries.
 ## Restore
 
 ```bash
-make restore BACKUP=/absolute/path/to/backup.sql.gz
+illuqc restore /absolute/path/to/backup.sql.gz
 ```
 
 This is destructive: active sessions are terminated and the configured
@@ -70,7 +70,7 @@ database is dropped and recreated. Before restoring:
 1. Read release notes and identify schema/parser changes.
 2. Back up PostgreSQL and `.env` separately.
 3. Test the new version against a copy of production data.
-4. Run `make audit` and static validation.
+4. Run `illuqc audit` and static validation.
 5. Apply explicit migrations to existing databases; initialization SQL is not a migration.
 6. Set `ILLUQC_VERSION` to the approved version.
 7. Rebuild and restart services.

@@ -9,6 +9,7 @@
 - **Samples**: sample-level metrics across one or more runs.
 - **Libraries**: library definitions and sample-metric distributions by library.
 - **Lab Data**: instruments, chemistry, libraries, and metric definitions.
+- **About**: IlluQC application and database schema versions.
 
 ## Database access
 
@@ -42,4 +43,3 @@ The Compose configuration publishes Streamlit on all host interfaces unless
 the host firewall restricts it. IlluQC currently has no built-in user
 authentication or authorization. Place it behind an authenticated reverse
 proxy or private network for any non-public data.
-

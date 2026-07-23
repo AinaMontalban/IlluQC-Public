@@ -8,7 +8,7 @@
 | `parser/` | Vendor and sample-data normalization. |
 | `db/` | Generic validated CSV loader and required-field map. |
 | `init-db/` | New-database DDL and seed data. |
-| `scripts/` | Operational wrappers and orchestration. |
+| `scripts/` | Grouped runtime, run, sample, lab, database, and tool wrappers. |
 | `demo/` | Synthetic demonstration inputs. |
 | `docs/` | User, operator, and maintainer documentation. |
 

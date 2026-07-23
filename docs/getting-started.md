@@ -10,6 +10,7 @@ write to processed, log, backup, and PostgreSQL directories.
 
 ```bash
 cp .env.example .env
+chmod 600 .env
 ```
 
 Edit `.env` before starting anything:
@@ -36,12 +37,13 @@ The default layout is:
 ../NGS_Data/
 ├── raw_data/
 │   ├── illumina/
-│   │   └── reference_tables/
 │   └── thermofisher/
-│       └── reference_tables/
 ├── processed/
 │   ├── Runs_Data/
-│   └── Samples_Data/
+│   ├── Samples_Data/
+│   ├── sequencing_instruments.csv
+│   ├── sequencing_chemistry.csv
+│   └── library.csv
 ├── logs/
 │   ├── parser/
 │   ├── loader/
@@ -96,8 +98,8 @@ folder contains `RunInfo.xml`, `RunParameters.xml`, `SampleSheet.csv`, and
 `InterOp/`.
 
 ```bash
-make parse RUN_ID=RUN_ID DESCRIPTION="Run description"
-make load RUN_ID=RUN_ID
+illuqc parse RUN_ID "Run description"
+illuqc load RUN_ID
 ```
 
 Expected run outputs are written under `PROCESSED_DATA_DIR/Runs_Data`:
@@ -107,7 +109,7 @@ RUN_ID-sequencing-info.csv
 RUN_ID-sequencing-metrics.csv
 ```
 
-At present, `make load` loads the first two files.
+`illuqc load RUN_ID` loads these two files after validating database readiness.
 
 ## 6. Samples data
 
@@ -124,8 +126,19 @@ mappings before producing and loading database-ready files.
 ## 7. Stop safely
 
 ```bash
-make down
+illuqc stop
 ```
 
 This stops containers without deleting `POSTGRES_DATA_DIR`. Back up the
-database regularly with `make backup`.
+database regularly with `illuqc backup`.
+
+## Optional: load the synthetic demo
+
+```bash
+illuqc demo
+```
+
+The command prints all source and destination paths, loads 11 synthetic MiSeq
+runs, HLA/ALLOSEQ sample data, and starts the dashboard. It refreshes the
+configured `Runs_Data` and `Samples_Data` directories, so use demo-specific
+paths rather than production paths.

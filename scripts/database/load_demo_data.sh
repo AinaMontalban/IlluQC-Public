@@ -69,10 +69,7 @@ mkdir -p "$PROCESSED_DATA_DIR/Runs_Data" "$PROCESSED_DATA_DIR/Samples_Data"
 
 cp -f demo/sequencing_instruments.csv "$PROCESSED_DATA_DIR/sequencing_instruments.csv"
 cp -f demo/sequencing_chemistry.csv "$PROCESSED_DATA_DIR/sequencing_chemistry.csv"
-# Keep both filenames: the lab loader consumes libraries.csv, while sample
-# validation uses library.csv as its local catalogue.
 cp -f demo/library.csv "$PROCESSED_DATA_DIR/library.csv"
-cp -f demo/library.csv "$PROCESSED_DATA_DIR/libraries.csv"
 cp -f "${run_info_files[@]}" "$PROCESSED_DATA_DIR/Runs_Data/"
 cp -f "${run_metric_files[@]}" "$PROCESSED_DATA_DIR/Runs_Data/"
 cp -f "${sample_metadata_files[@]}" "$PROCESSED_DATA_DIR/Samples_Data/"
@@ -82,7 +79,6 @@ printf 'Copied reference data to:\n'
 printf '  %s/sequencing_instruments.csv\n' "$PROCESSED_DATA_DIR"
 printf '  %s/sequencing_chemistry.csv\n' "$PROCESSED_DATA_DIR"
 printf '  %s/library.csv\n' "$PROCESSED_DATA_DIR"
-printf '  %s/libraries.csv\n' "$PROCESSED_DATA_DIR"
 printf 'Copied %d run file pairs to %s/Runs_Data\n' \
   "${#run_info_files[@]}" "$PROCESSED_DATA_DIR"
 printf 'Copied %d sample file pairs to %s/Samples_Data\n' \

@@ -85,3 +85,12 @@ Recommended load order:
 
 Foreign keys enforce much of this order. Duplicate primary keys are skipped,
 not updated.
+
+## Operational scripts
+
+The `scripts/` directory is grouped by responsibility: `runtime/` for Compose
+v2 and setup, `runs/` for run parsing/loading, `samples/` for sample workflows,
+`lab/` for reference data, `database/` for backup/restore/demo, `lib/` for
+shared shell helpers, and `tools/` for standalone utilities. Operators should
+normally use the top-level `illuqc` command rather than invoke these scripts
+directly.

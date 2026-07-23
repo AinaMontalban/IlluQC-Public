@@ -10,7 +10,6 @@ quote values containing spaces when sourcing them from shell scripts.
 |---|---|---|
 | `PROJECT_NAME` | `illuqc` | Prefix for locally built image names. |
 | `ILLUQC_VERSION` | `0.1.0` | Image tag used by Compose. |
-| `ILLUQC_COMPOSE_MODE` | `auto` | Select `auto`, `v2`, or `legacy` Compose invocation. |
 | `LOCAL_UID` | `10001` | Runtime UID for parser, loader, and dashboard. |
 | `LOCAL_GID` | `10001` | Runtime GID for parser, loader, and dashboard. |
 | `NGS_DATA_ROOT` | `../NGS_Data` | Fallback root used by shell helpers. |
@@ -47,7 +46,7 @@ for PostgreSQL, not an object-store mount or intermittently connected share.
 | Variable | Required | Purpose |
 |---|---|---|
 | `POSTGRES_USER` | no | Database owner; defaults to `illuqc`. |
-| `POSTGRES_PASSWORD` | yes | Database password; no insecure fallback exists. |
+| `POSTGRES_PASSWORD` | yes | Deployment-specific database password; placeholders are rejected and fewer than 16 characters produces a warning. |
 | `POSTGRES_DB` | no | Database name; defaults to `illuqcdb`. |
 | `POSTGRES_HOST` | native tools | Hostname for non-Compose access. |
 | `POSTGRES_PORT` | no | Port; defaults to `5432`. |
@@ -56,16 +55,19 @@ Compose passes the same values to the loader and maps them to `DB_*` variables
 for Streamlit. Changing user, password, or database after initial PostgreSQL
 initialization does not rewrite existing roles or databases.
 
-## Compose-time validation
-
-All IlluQC scripts and Make targets call `scripts/runtime/compose.sh`. In `auto` mode
-the wrapper prefers Docker Compose v2 (`docker compose`) and uses the legacy
-`docker-compose` executable only when the v2 plugin is unavailable. Force one
-implementation when diagnosing a host installation:
+Keep `.env` outside Git and restrict it to the service owner:
 
 ```bash
-ILLUQC_COMPOSE_MODE=v2 ./scripts/runtime/compose.sh version
-ILLUQC_COMPOSE_MODE=legacy ./scripts/runtime/compose.sh version
+chmod 600 .env
+```
+
+## Compose-time validation
+
+All IlluQC scripts and Make targets call `scripts/runtime/compose.sh`, which
+requires Docker Compose v2 (`docker compose`). Verify it with:
+
+```bash
+./scripts/runtime/compose.sh version
 ```
 
 Required variables use Compose's `:?` syntax. Check interpolation without
@@ -80,7 +82,6 @@ starting containers:
 ```dotenv
 PROJECT_NAME=illuqc
 ILLUQC_VERSION=0.1.0
-ILLUQC_COMPOSE_MODE=auto
 LOCAL_UID=1000
 LOCAL_GID=1000
 

@@ -25,11 +25,13 @@ From the repository root:
 
 ```bash
 cp .env.example .env
-make setup-data-dirs
-make demo
+./illuqc setup
+./illuqc demo
 ```
 
-The `make demo` target should copy these files into the external data directory configured in `.env`, start PostgreSQL, load the reference tables, load all demo runs, and start Streamlit.
+`illuqc demo` reports the resolved paths and input counts, refreshes the
+configured processed run/sample directories, loads reference, run, and sample
+data, prints database row counts, and starts Streamlit.
 
 ## Important
 

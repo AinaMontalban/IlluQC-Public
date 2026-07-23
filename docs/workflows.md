@@ -20,7 +20,7 @@ Referenced `platform_id` values must already exist. The seed SQL provides
 ### One run
 
 ```bash
-make parse RUN_ID=RUN_ID DESCRIPTION="Description"
+illuqc parse RUN_ID "Description"
 ```
 
 The wrapper verifies `ILLUMINA_RAW_DATA_DIR/RUN_ID`, mounts it read-only, and
@@ -30,7 +30,7 @@ runs the InterOp parser. Output filenames and columns are controlled by
 Load normalized run data:
 
 ```bash
-make load RUN_ID=RUN_ID
+illuqc load RUN_ID
 ```
 
 ### All runs
@@ -54,10 +54,7 @@ success after partial completion. Always inspect their summary and log files.
 Supported input families are S5 serialized JSON and Genexus plan JSON.
 
 ```bash
-make parse-thermofisher \
-  JSON_FILE=serialized_run.json \
-  DESCRIPTION="Description" \
-  MODEL=S5
+illuqc parse-thermofisher serialized_run.json S5 "Description"
 ```
 
 `JSON_FILE` must resolve inside `THERMOFISHER_RAW_DATA_DIR`. `MODEL` accepts
@@ -66,9 +63,9 @@ make parse-thermofisher \
 Batch discovery:
 
 ```bash
-make parse-thermofisher-all MODEL=AUTO
-make parse-thermofisher-all MODEL=S5
-make parse-thermofisher-all MODEL=GENEXUS
+illuqc parse-thermofisher-all AUTO
+illuqc parse-thermofisher-all S5
+illuqc parse-thermofisher-all GENEXUS
 ```
 
 S5 discovery matches `serialized_*.json`; Genexus discovery matches

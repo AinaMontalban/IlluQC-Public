@@ -26,6 +26,14 @@ load_env() {
     echo "ERROR: POSTGRES_PASSWORD must be set in .env" >&2
     exit 1
   fi
+  if [ "$POSTGRES_PASSWORD" = "replace-with-a-long-random-password" ] \
+    || [ "$POSTGRES_PASSWORD" = "replace-this-password" ]; then
+    echo "ERROR: replace the example POSTGRES_PASSWORD before running IlluQC" >&2
+    exit 1
+  fi
+  if [ "${#POSTGRES_PASSWORD}" -lt 16 ]; then
+    echo "WARNING: POSTGRES_PASSWORD should contain at least 16 characters" >&2
+  fi
   export POSTGRES_DB="${POSTGRES_DB:-illuqcdb}"
   export POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 }

@@ -26,7 +26,8 @@ with st.expander(" How to use this app", expanded=True):
         | Protocols | Explore sequencing metrics **over time** for a given protocol. Select an instrument model, chemistry combination, and QC metric, then adjust the year-range slider to zoom in. |
         | Runs | Inspect **individual runs**. Pick a run to see its metadata and compare a chosen metric across all runs with a density plot. |
         | Samples | Visualise **per-sample QC metrics** (FastQC) for a selected run. Box-plot distributions, per-sample bar charts, and R1 vs R2 scatter comparisons. |
-        | Database | Browse raw database tables (samples, instruments, library, protocols, QC metrics, etc.) for quick look-ups. |
+        | Libraries | Explore library definitions and sample-QC distributions. |
+        | Lab Data | Browse instruments, sequencing chemistry, libraries, and metric definitions. |
         | About | Basic information about IlluQC. |
         ---
 
@@ -39,8 +40,8 @@ with st.expander(" How to use this app", expanded=True):
            historical data.
         4. Open **Samples** to inspect per-sample FastQC metrics within a run
            and compare R1 vs R2 quality.
-        5. Check **Database** if you need to look up raw records or verify
-           uploaded data.
+        5. Use **Libraries** for library-level comparisons and **Lab Data** to
+           verify uploaded reference records.
 
         """
     )

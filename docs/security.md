@@ -9,13 +9,15 @@ container, database, network, backup, and log layers.
 ## Credentials
 
 - Generate a unique PostgreSQL password for each deployment.
-- Keep `.env` readable only by the service owner where practical.
+- Keep `.env` untracked and readable only by the service owner (`chmod 600 .env`).
 - Never pass passwords through loader command-line arguments; they may appear in
   process listings or audit logs.
 - Do not commit `.env`, database dumps, Streamlit secrets, or production logs.
 - Prefer an institutional secret manager for orchestrated deployments.
 - Rotate credentials through a planned database-role change; changing `.env`
   alone does not change an existing PostgreSQL password.
+- The loader accepts its password only through `POSTGRES_PASSWORD`; it has no
+  password command-line option.
 
 ## Network controls
 
@@ -46,7 +48,7 @@ Runtime Python dependencies and base-image versions are pinned. Run:
 
 ```bash
 python -m pip install -r requirements-dev.txt
-make audit
+illuqc audit
 ```
 
 Also scan built container images with the organization's approved scanner.
@@ -59,4 +61,3 @@ Use synthetic data for demonstrations. Establish retention and deletion rules
 for raw inputs, normalized CSVs, database rows, logs, and backups. IlluQC does
 not implement record-level authorization, consent management, or automatic
 retention enforcement.
-

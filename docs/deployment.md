@@ -6,15 +6,14 @@ Docker Compose is the reference deployment. It provides service health checks,
 consistent dependency versions, read-only raw-data mounts, durable PostgreSQL
 storage, and short-lived parser/loader jobs.
 
-IlluQC routes Compose operations through `scripts/runtime/compose.sh` to prevent command
-conflicts. Docker Compose v2 is preferred; legacy `docker-compose` is only a
-compatibility fallback.
+IlluQC routes Compose operations through `scripts/runtime/compose.sh` and
+requires Docker Compose v2.
 
 ```bash
 cp .env.example .env
-make setup-data-dirs
-./scripts/runtime/compose.sh config --quiet
-./scripts/runtime/compose.sh up -d --build db streamlit
+./illuqc setup
+./illuqc config
+./illuqc start
 ```
 
 Use a reverse proxy for TLS and authentication. Do not publish PostgreSQL unless
