@@ -246,13 +246,6 @@ apptainer exec \
     --server.address=0.0.0.0 --server.port=8501
 ```
 
-Use a scheduler job and SSH tunnel when compute nodes are not directly
-reachable:
-
-```bash
-ssh -N -L 8501:COMPUTE_NODE:8501 USER@CLUSTER_LOGIN_HOST
-```
-
 Then open <http://localhost:8501>.
 
 ### Run an Illumina parser

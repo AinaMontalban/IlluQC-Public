@@ -133,6 +133,7 @@ The full documentation is indexed at [docs/README.md](docs/README.md):
 | [Dashboard](docs/dashboard.md) | Pages, query behavior, interpretation, and access boundaries. |
 | [Operations](docs/operations.md) | Health, logs, backup, restore, upgrades, and capacity. |
 | [Deployment](docs/deployment.md) | Compose, native Python, Apptainer, and production checklist. |
+| [Offline operation](docs/offline.md) | Prepare, transfer, import, and run IlluQC without internet access. |
 | [Security](docs/security.md) | Credentials, networking, permissions, logs, and supply chain. |
 | [Troubleshooting](docs/troubleshooting.md) | Diagnostic procedures for common failures. |
 | [Development](docs/development.md) | Extension points and safe maintenance practices. |

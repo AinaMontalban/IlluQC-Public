@@ -13,6 +13,7 @@ data contracts, supported ingestion paths, dashboard, and operational model.
 - [Dashboard](dashboard.md): pages, queries, filters, and interpretation boundaries.
 - [Operations](operations.md): startup, health, logs, backup, restore, and upgrades.
 - [Deployment](deployment.md): Docker Compose, native Python, and Apptainer/Singularity.
+- [Offline operation](offline.md): image preparation, secure transfer, startup, and limitations without internet access.
 - [Security](security.md): secrets, network exposure, filesystem permissions, and sensitive data.
 - [Troubleshooting](troubleshooting.md): symptoms, diagnostics, and recovery procedures.
 - [Development](development.md): repository conventions and safe extension points.
