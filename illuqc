@@ -66,7 +66,7 @@ Sample-level data:
   Recommended single-sample options:
     --sex VALUE                 Sample sex (required)
     --library-id ID             Library identifier (required)
-    --metrics-file FILE         MultiQC statistics TSV; may be repeated
+    --metrics-file FILE         MultiQC TSV or sample-metrics CSV; repeatable
     --clinical-method VALUE     Optional clinical method metadata
     --sample-type VALUE         Optional sample type metadata
     --force                     Replace existing prepared files

@@ -116,8 +116,8 @@ after reviewing them.
 
 ### One sample
 
-For a new single sample, pass its metadata as options and provide the MultiQC
-general-statistics file explicitly:
+For a new single sample, pass its metadata as options and provide a MultiQC
+general-statistics TSV or semicolon-delimited sample-metrics CSV explicitly:
 
 ```bash
 illuqc prepare-sample RUN_ID SAMPLE_ID \
@@ -134,6 +134,18 @@ illuqc load-sample RUN_ID SAMPLE_ID
 metric values are merged; conflicting values fail validation. The sample's
 registration date is assigned by PostgreSQL when `load-sample` first inserts
 the sample. Existing load-ready output is protected unless `--force` is used.
+
+The semicolon format is detected from its header, beginning with `sample` and
+the configured BAM/coverage metric columns. MultiQC and semicolon files can be
+provided together:
+
+```bash
+illuqc ingest-sample RUN_ID SAMPLE_ID \
+  --sex F \
+  --library-id LIBRARY_ID \
+  --metrics-file /path/to/multiqc_general_stats.txt \
+  --metrics-file /path/to/sample_metrics.csv
+```
 
 Preparation and loading can be combined by replacing `prepare-sample` with
 `ingest-sample`.

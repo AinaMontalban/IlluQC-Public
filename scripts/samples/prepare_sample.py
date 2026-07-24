@@ -10,7 +10,24 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "parser" / "MultiQC"))
+sys.path.insert(0, str(REPO_ROOT / "parser" / "Sample_Metrics"))
 from multiqc_data_parser import parse_multiqc_general_stats  # noqa: E402
+from sample_metrics_parser import (  # noqa: E402
+    METRIC_COLUMNS,
+    parse_sample_metrics,
+)
+
+
+def parse_metrics_file(path, config, sample_id):
+    """Parse a supported metrics file after inspecting its header."""
+    with path.open(encoding="utf-8-sig") as handle:
+        first_line = handle.readline().rstrip("\r\n")
+    semicolon_header = {
+        column.strip() for column in first_line.split(";") if column.strip()
+    }
+    if {"sample", *METRIC_COLUMNS}.issubset(semicolon_header):
+        return parse_sample_metrics(path, sample_filter=sample_id)
+    return parse_multiqc_general_stats(path, config, sample_filter=sample_id)
 
 
 def known_library_ids(path):
@@ -62,7 +79,7 @@ def main():
     parser.add_argument(
         "--metrics-file", "--metrics", dest="metric_files", action="append",
         type=Path, required=True,
-        help="MultiQC general-statistics TSV; repeat for additional files",
+        help="MultiQC TSV or semicolon sample-metrics CSV; repeat for additional files",
     )
     parser.add_argument(
         "--processed-data-dir", type=Path, required=True, help=argparse.SUPPRESS
@@ -99,7 +116,10 @@ def main():
     metrics = {}
     sources = {}
     for metric_file in args.metric_files:
-        parsed = parse_multiqc_general_stats(metric_file, config, sample_filter=args.sample_id)
+        try:
+            parsed = parse_metrics_file(metric_file, config, args.sample_id)
+        except ValueError as error:
+            parser.error(f"invalid metrics file {metric_file}: {error}")
         for row in parsed["sample_metrics"]:
             metric_id = row["metric_id"]
             value = row["value_number"]

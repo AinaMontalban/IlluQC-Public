@@ -101,6 +101,7 @@ INSERT INTO qc_metric_definitions(metric_id, metric_name, display_label, workflo
 ('FASTQC_PERCENT_DUPLICATES_R2',    'Percent duplicates R2',    'Duplicates R2 (%)',              'demultiplexing', 'sample', '%',      'number', 'Percentage of duplicate reads R2'),
 ('FASTQC_AVG_SEQUENCE_LENGTH_R1',   'Avg sequence length R1',   'Avg Sequence Length R1 (bp)',    'demultiplexing', 'sample', 'bp',     'number', 'Average sequence length R1'),
 ('FASTQC_AVG_SEQUENCE_LENGTH_R2',   'Avg sequence length R2',   'Avg Sequence Length R2 (bp)',    'demultiplexing', 'sample', 'bp',     'number', 'Average sequence length R2'),
+('length', 'length', 'Reference Length', 'BAM QC', 'sample', 'bp', 'number', 'Reference or target length reported by the sample QC workflow'),
 ('total_reads', 'total reads', 'total reads', 'BAM QC', 'sample', 'reads', 'INTEGER', 'Total number of sequencing reads'),
 ('primary_reads', 'primary reads', 'primary reads', 'BAM QC', 'sample', 'reads', 'INTEGER', 'Number of primary reads'),
 ('prop_primary_reads', 'prop primary reads', 'prop primary reads', 'BAM QC', 'sample', '%', 'FLOAT', 'Proportion of primary reads'),
@@ -130,7 +131,7 @@ INSERT INTO qc_metric_definitions(metric_id, metric_name, display_label, workflo
 ('mean', 'mean', 'mean', 'BAM QC', 'sample', 'X', 'FLOAT', 'Mean sequencing coverage'),
 ('min', 'min', 'min', 'BAM QC', 'sample', 'X', 'INTEGER', 'Minimum sequencing coverage'),
 ('max', 'max', 'max', 'BAM QC', 'sample', 'X', 'INTEGER', 'Maximum sequencing coverage'),
-('Coverage_Uniformity', 'Coverage Uniformity', 'Coverage Uniformity', 'BAM QC', 'sample', '%', 'FLOAT', 'Coverage uniformity across target regions');
+('Coverage_Uniformity', 'Coverage Uniformity', 'Coverage Uniformity', 'BAM QC', 'sample', '%', 'FLOAT', 'Coverage uniformity across target regions')
 ON CONFLICT (metric_id) DO NOTHING;
 
 -- =========================
