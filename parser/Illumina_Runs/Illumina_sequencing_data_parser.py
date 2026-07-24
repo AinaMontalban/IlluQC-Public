@@ -314,7 +314,7 @@ def parse_interop_metrics(run_folder, run_info_path):
     return result
 
 
-def parse_run_folder(run_folder):
+def parse_run_folder(run_folder, samplesheet=None):
 	"""Orchestrate parsing of all data sources within an Illumina run folder.
 
 	Reads RunInfo.xml, RunParameters.xml, SampleSheet.csv, and the InterOp
@@ -323,6 +323,8 @@ def parse_run_folder(run_folder):
 
 	Args:
 		run_folder: Path to the top-level Illumina run folder.
+		samplesheet: Optional path to SampleSheet.csv. Defaults to the copy
+			inside ``run_folder``.
 
 	Returns:
 		dict containing run metadata (run_id, day_id, instrument_id, …)
@@ -333,7 +335,7 @@ def parse_run_folder(run_folder):
 	"""
 	run_info_path = run_folder + "/RunInfo.xml"
 	run_parameters_path = run_folder + "/RunParameters.xml"
-	sample_sheet_path = run_folder + "/SampleSheet.csv"
+	sample_sheet_path = samplesheet or run_folder + "/SampleSheet.csv"
 	interop_folder = run_folder + "/InterOp"
 
 	logging.debug("Run info path: %s", run_info_path)
@@ -470,6 +472,12 @@ def main():
 		help="Path to the Illumina run folder.",
 	)
 	parser.add_argument(
+		"--samplesheet",
+		"--sample-sheet",
+		dest="samplesheet",
+		help="Optional path to SampleSheet.csv; defaults to the run folder.",
+	)
+	parser.add_argument(
 		"--output-dir",
 		help="Directory where run-info, sequencing-info, and sequencing-metrics CSVs are written (defaults to run folder or --output).",
 	)
@@ -500,7 +508,7 @@ def main():
 	global CONFIG
 	CONFIG = load_config()
 
-	metrics = parse_run_folder(args.run_folder)
+	metrics = parse_run_folder(args.run_folder, samplesheet=args.samplesheet)
 	metrics["run_description"] = args.run_description or ""
 	print("Parsed metrics for run %s" % metrics.get("run_id"))
 	print("Run metadata: day_id=%s, instrument_id=%s, sequencing_chemistry_id=%s"

@@ -16,10 +16,17 @@ if [ ! -d "$HOST_RUN_DIR" ]; then
   exit 1
 fi
 
+HOST_SAMPLESHEET="$HOST_RUN_DIR/SampleSheet.csv"
+if [ ! -f "$HOST_SAMPLESHEET" ]; then
+  echo "ERROR: sample sheet not found: $HOST_SAMPLESHEET" >&2
+  exit 1
+fi
+
 mkdir -p "$PROCESSED_DATA_DIR/Runs_Data" "$LOG_DIR/parser"
 
 compose run --rm parser \
   --run-folder "/data/raw/illumina/$RUN_ID/run_qc/illumina" \
+  --samplesheet "/data/raw/illumina/$RUN_ID/SampleSheet.csv" \
   --output-dir "/data/processed/Runs_Data" \
   --run-description "$DESCRIPTION" \
   --log-file "/logs/parser/${RUN_ID}_parser.log"
