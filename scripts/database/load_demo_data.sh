@@ -76,9 +76,9 @@ cp -f "${sample_metadata_files[@]}" "$PROCESSED_DATA_DIR/Samples_Data/"
 cp -f "${sample_metric_files[@]}" "$PROCESSED_DATA_DIR/Samples_Data/"
 
 printf 'Copied reference data to:\n'
-printf '  %s/sequencing_instruments.csv\n' "$PROCESSED_DATA_DIR"
-printf '  %s/sequencing_chemistry.csv\n' "$PROCESSED_DATA_DIR"
-printf '  %s/library.csv\n' "$PROCESSED_DATA_DIR"
+printf '  %s/sequencing_instruments.csv\n' "$PROCESSED_DATA_DIR/Lab_Data/"
+printf '  %s/sequencing_chemistry.csv\n' "$PROCESSED_DATA_DIR/Lab_Data/"
+printf '  %s/library.csv\n' "$PROCESSED_DATA_DIR/Lab_Data/"
 printf 'Copied %d run file pairs to %s/Runs_Data\n' \
   "${#run_info_files[@]}" "$PROCESSED_DATA_DIR"
 printf 'Copied %d sample file pairs to %s/Samples_Data\n' \

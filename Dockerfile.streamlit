@@ -11,8 +11,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip && \
       pip install --no-cache-dir streamlit pandas sqlalchemy psycopg2-binary; \
     fi
 
-RUN groupadd --gid 10001 illuqc && \
-    useradd --uid 10001 --gid illuqc --create-home illuqc && \
+RUN groupadd --gid 1001 illuqc && \
+    useradd --uid 1001 --gid illuqc --create-home illuqc && \
     mkdir -p /home/illuqc/.streamlit /logs/app /config && \
     chown -R illuqc:illuqc /home/illuqc /opt/illuqc /logs /config
 

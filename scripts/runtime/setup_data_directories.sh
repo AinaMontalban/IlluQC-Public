@@ -7,11 +7,10 @@ source "$SCRIPT_DIR/../lib/common.sh"
 load_env
 
 mkdir -p "$ILLUMINA_RAW_DATA_DIR"
-mkdir -p "$ILLUMINA_RAW_DATA_DIR/reference_tables"
 mkdir -p "$THERMOFISHER_RAW_DATA_DIR"
-mkdir -p "$THERMOFISHER_RAW_DATA_DIR/reference_tables"
 mkdir -p "$PROCESSED_DATA_DIR/Runs_Data"
 mkdir -p "$PROCESSED_DATA_DIR/Samples_Data"
+mkdir -p "$PROCESSED_DATA_DIR/Lab_Data"
 mkdir -p "$LOG_DIR/parser"
 mkdir -p "$LOG_DIR/loader"
 mkdir -p "$LOG_DIR/app"

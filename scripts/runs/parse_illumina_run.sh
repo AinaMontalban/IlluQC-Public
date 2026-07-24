@@ -19,7 +19,7 @@ fi
 mkdir -p "$PROCESSED_DATA_DIR/Runs_Data" "$LOG_DIR/parser"
 
 compose run --rm parser \
-  --run-folder "/data/raw/illumina/$RUN_ID" \
+  --run-folder "/data/raw/illumina/$RUN_ID/run_qc/illumina" \
   --output-dir "/data/processed/Runs_Data" \
   --run-description "$DESCRIPTION" \
   --log-file "/logs/parser/${RUN_ID}_parser.log"

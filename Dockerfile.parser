@@ -17,8 +17,8 @@ RUN if [ -f /opt/illuqc/parser/Illumina_Runs/requirements.txt ]; then \
       pip install --no-cache-dir -r /opt/illuqc/parser/requirements.txt; \
     fi
 
-RUN groupadd --gid 10001 illuqc && \
-    useradd --uid 10001 --gid illuqc --no-create-home illuqc && \
+RUN groupadd --gid 1001 illuqc && \
+    useradd --uid 1001 --gid illuqc --no-create-home illuqc && \
     mkdir -p /data/raw /data/processed /logs && \
     chown -R illuqc:illuqc /data /logs /opt/illuqc
 
