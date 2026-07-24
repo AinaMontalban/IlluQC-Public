@@ -50,7 +50,7 @@ On the offline computer:
 
 ```bash
 docker image load --input illuqc-offline-images.tar
-docker image ls
+docker image ls 
 ./scripts/runtime/compose.sh config --images
 ```
 
@@ -63,14 +63,6 @@ Create a private local configuration:
 ```bash
 cp .env.example .env
 chmod 600 .env
-```
-
-Review every external path in `.env`; paths from the connected preparation
-computer may not exist offline. Generate a deployment-specific PostgreSQL
-password, for example:
-
-```bash
-openssl rand -hex 32
 ```
 
 Store the generated value as `POSTGRES_PASSWORD` in `.env`. Never commit the
@@ -136,18 +128,3 @@ Transfer the resulting `.sql.gz` file and restore it offline:
 
 Use compatible IlluQC application and database schema versions. Back up the
 offline database before upgrades or image replacement.
-
-## Operations unavailable without prepared artifacts
-
-An isolated deployment cannot perform operations that require internet access,
-including:
-
-- pulling missing or updated container images;
-- rebuilding layers whose dependencies are not cached locally;
-- downloading Python packages;
-- updating the vulnerability data used by `pip-audit`;
-- retrieving operating-system or base-image security updates.
-
-Build, audit, and export images from the exact reviewed IlluQC commit intended
-for the offline deployment. Repeat the controlled transfer process when
-updating code, images, or vulnerability fixes.
