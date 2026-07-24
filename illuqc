@@ -245,6 +245,14 @@ case "$command_name" in
     fi
     bash scripts/samples/load_run_samples.sh "$run_id" "$sample_id"
     ;;
+  ingest-run-samples)
+    require_arg "${1:-}" "RUN_ID"
+    require_arg "${2:-}" "LIBRARY_ID"
+    run_id="$1"
+    library_id="$2"
+    shift
+    bash scripts/samples/ingest_run_samples.sh "$run_id" "$library_id" 
+    ;;
   prepare-samples-all)
     bash scripts/samples/prepare_all_run_samples.sh "${1:-}"
     ;;
